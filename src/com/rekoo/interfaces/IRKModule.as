@@ -20,7 +20,7 @@ package com.rekoo.interfaces
 		 * @return Object。
 		 * 
 		 */		
-		function call(protocol_:String, args_:Object = null):Object;
+		function call(protocol_:String, ...args_):Object;
 		
 		/**
 		 * 消息订阅者的响应 
@@ -28,7 +28,7 @@ package com.rekoo.interfaces
 		 * @param args_ 额外参数。
 		 * 
 		 */		
-		function notify(protocol_:String, args_:Object = null):void;
+		function notify(protocol_:String, ...args_):void;
 		
 		/**
 		 * 销毁模块。

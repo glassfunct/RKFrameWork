@@ -1,6 +1,7 @@
 package com.rekoo.remoting
 {
 	import com.rekoo.RKResourceType;
+	import com.rekoo.interfaces.IRKBaseLoader;
 	import com.rekoo.manager.RKResourceManager;
 	
 	import flash.events.Event;
@@ -15,7 +16,7 @@ package com.rekoo.remoting
 	 * @author Administrator
 	 * 
 	 */	
-	public class RKResourceURLLoader extends URLLoader
+	public class RKResourceURLLoader extends URLLoader implements IRKBaseLoader
 	{
 		/* 基本URL。 */
 		private var _baseURL:String = null;

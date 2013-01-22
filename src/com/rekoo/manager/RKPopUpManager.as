@@ -19,9 +19,9 @@ package com.rekoo.manager
 	public final class RKPopUpManager
 	{
 		/* 当前正在显示的弹框。 */
-		private var _showingPopUpList:Array = [];
+		private var _showingPopUpList:Vector.<Object> = new Vector.<Object>();
 		/* 排队等待显示的弹框。 */
-		private var _queuePopUpList:Array = [];
+		private var _queuePopUpList:Vector.<Object> = new Vector.<Object>();
 		
 		/* 弹框蒙版。 */
 		private var _modalPopUpMask:Sprite = new Sprite();

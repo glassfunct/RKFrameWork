@@ -3,17 +3,12 @@ package com.rekoo.manager
 	import com.rekoo.RKFrameWork;
 	import com.rekoo.RKResourceType;
 	import com.rekoo.event.RKResourceEvent;
+	import com.rekoo.interfaces.IRKBaseLoader;
 	import com.rekoo.remoting.RKResourceLoader;
 	import com.rekoo.remoting.RKResourceURLLoader;
-	import com.rekoo.util.RKArrayUtil;
 	
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.display.Loader;
-	import flash.display.MovieClip;
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
@@ -37,17 +32,17 @@ package com.rekoo.manager
 		private var _noLoadFilesInProgress:int = 0;
 		
 		/* 所用到的域列表。 */
-		private var _domains:Array = [];
+		private var _domains:Vector.<ApplicationDomain> = new Vector.<ApplicationDomain>();
 		/* 已加载的素材。 */
 		private var _resDic:Object = {};
 		
 		/* 正在加载的Loader。 */
-		private var _resLoadingLoader:Array = [];
+		private var _resLoadingLoader:Vector.<IRKBaseLoader> = new Vector.<IRKBaseLoader>();
 		
 		/* 正在加载的素材URL。 */
-		private var _resLoadingURL:Array = [];
+		private var _resLoadingURL:Vector.<Object> = new Vector.<Object>();
 		/* 待加载的素材URL。 */
-		private var _resToLoadURL:Array = [];
+		private var _resToLoadURL:Vector.<Object> = new Vector.<Object>();
 		
 		/* 资源哈希映射表。 */
 		private var _hashMap:Object = {};
@@ -208,7 +203,7 @@ package com.rekoo.manager
 			
 			if ( target_.resourceType == RKResourceType.RESOURCE_TYPE_SWF )
 			{
-				if ( RKArrayUtil.getItemIndex(target_.contentLoaderInfo.applicationDomain, _domains) == -1 )
+				if ( _domains.indexOf(target_.contentLoaderInfo.applicationDomain) == -1 )
 				{
 					_domains.push(target_.contentLoaderInfo.applicationDomain);
 				}

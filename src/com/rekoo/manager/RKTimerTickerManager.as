@@ -13,7 +13,7 @@ package com.rekoo.manager
 	public final class RKTimerTickerManager
 	{
 		private var _timer:Timer = new Timer(1000);
-		private var _list:Array = [];
+		private var _list:Vector.<IRKTimerTicker> = new Vector.<IRKTimerTicker>();
 		
 		private static var _instance:RKTimerTickerManager = null;
 		

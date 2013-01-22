@@ -154,11 +154,11 @@ package com.rekoo.util
 		 * @param bitmapData_ 源图像。
 		 * @param cols_ 源图像包含的列数。
 		 * @param rows_ 源图像包含的行数。
-		 * @return Array。
+		 * @return Vector.<BitmapData>。
 		 */		
-		public static function splitBitmapData(bitmapData_:BitmapData, cols_:int, rows_:int):Array
+		public static function splitBitmapData(bitmapData_:BitmapData, cols_:int, rows_:int):Vector.<BitmapData>
 		{
-			var _arr:Array = [];
+			var _v:Vector.<BitmapData> = new Vector.<BitmapData>();
 			var _bitmapData:BitmapData = null;
 			var _cellW:Number = bitmapData_.width / cols_;
 			var _cellH:Number = bitmapData_.height / rows_;
@@ -172,11 +172,11 @@ package com.rekoo.util
 					_bitmapData.copyPixels(bitmapData_, new Rectangle(_col * _cellW, _row * _cellH, _cellW, _cellH), new Point());
 					_bitmapData.unlock();
 					
-					_arr.push(_bitmapData);
+					_v.push(_bitmapData);
 				}
 			}
 			
-			return _arr;
+			return _v;
 		}
 	}
 }

@@ -18,7 +18,7 @@ package com.rekoo.display
 	{
 		private var _mc:MovieClip = null;
 		private var _bitmap:Bitmap = null;
-		private var _bitmapDataArr:Array = [];
+		private var _bitmapDataArr:Vector.<BitmapData> = new Vector.<BitmapData>();
 		
 		/**
 		 * 使用位图缓存的影片剪辑。
@@ -37,7 +37,7 @@ package com.rekoo.display
 		 * @param bitmapDatas_ 位图数组。元素为BitmapData。
 		 * @return RKBitmapMovieClip。
 		 */		
-		public function createFromBitmapDatas(bitmapDatas_:Array):RKBitmapMovieClip
+		public function createFromBitmapDatas(bitmapDatas_:Vector.<BitmapData>):RKBitmapMovieClip
 		{
 			skin = null;
 			_bitmapDataArr = bitmapDatas_;

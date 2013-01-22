@@ -73,7 +73,7 @@ package com.rekoo.manager
 		 * @return Object 返回值。
 		 * 
 		 */		
-		public function callModule(moduleName_:String, protocol_:String, params_:Array = null):Object
+		public function callModule(moduleName_:String, protocol_:String, ...params_):Object
 		{
 			var _module:IRKModule = getModule(moduleName_);
 			

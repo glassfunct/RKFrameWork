@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
-    <classEntry path="com.rekoo.util.RKArrayUtil"/>
     <classEntry path="com.rekoo.manager.RKModuleManager"/>
     <classEntry path="com.rekoo.interfaces.IRKModule"/>
     <classEntry path="com.rekoo.event.RKResourceEvent"/>
@@ -25,6 +24,8 @@
     <classEntry path="com.rekoo.display.RKMovieClip"/>
     <classEntry path="com.rekoo.display.RKBitmapMovieClip"/>
     <classEntry path="com.rekoo.util.RKNumberUtil"/>
+    <classEntry path="com.rekoo.geom.RKSize"/>
+    <classEntry path="com.rekoo.interfaces.IRKBaseLoader"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

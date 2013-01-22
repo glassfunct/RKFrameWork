@@ -20,7 +20,7 @@ package com.rekoo.manager
 		public static var MAX_INTERVAL:int = 1000;
 		
 		private var _stage:Stage = null;
-		private var _list:Array = [];
+		private var _list:Vector.<Object> = new Vector.<Object>();
 		
 		private var _lastTime:int = 0;
 		
