@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.rekoo.util.RKArrayUtil"/>
+    <classEntry path="com.rekoo.manager.RKModuleManager"/>
+    <classEntry path="com.rekoo.interfaces.IRKModule"/>
+    <classEntry path="com.rekoo.event.RKResourceEvent"/>
+    <classEntry path="com.rekoo.manager.RKGUIManager"/>
+    <classEntry path="com.rekoo.interfaces.IRKGUI"/>
+    <classEntry path="com.rekoo.interfaces.IRKPopUp"/>
+    <classEntry path="com.rekoo.util.RKStringUtil"/>
+    <classEntry path="com.rekoo.display.component.RKButton"/>
+    <classEntry path="com.rekoo.interfaces.IRKSprite"/>
+    <classEntry path="com.rekoo.util.RKDisplayObjectUtil"/>
+    <classEntry path="com.rekoo.manager.RKToopTipManager"/>
+    <classEntry path="com.rekoo.RKDisplayAlign"/>
+    <classEntry path="com.rekoo.interfaces.IRKToolTipSkin"/>
+    <classEntry path="com.rekoo.interfaces.IRKToolTipable"/>
+    <classEntry path="com.rekoo.display.RKSprite"/>
+    <classEntry path="com.rekoo.manager.RKTimerTickerManager"/>
+    <classEntry path="com.rekoo.interfaces.IRKTimerTicker"/>
+    <classEntry path="com.rekoo.manager.RKFrameTickerManager"/>
+    <classEntry path="com.rekoo.interfaces.IRKFrameTicker"/>
+    <classEntry path="com.rekoo.interfaces.IRKMovieClip"/>
+    <classEntry path="com.rekoo.display.RKMovieClip"/>
+    <classEntry path="com.rekoo.display.RKBitmapMovieClip"/>
+    <classEntry path="com.rekoo.util.RKNumberUtil"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
