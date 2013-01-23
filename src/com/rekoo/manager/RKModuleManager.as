@@ -33,8 +33,10 @@ package com.rekoo.manager
 				_modules[module_.getModuleName()] = module_;
 				module_.init();
 			}
-			
-			throw new Error("已经存在的模块,请不要重复注册");
+			else
+			{
+				//throw new Error("已经存在的模块,请不要重复注册");
+			}
 		}
 		
 		/**
@@ -44,9 +46,9 @@ package com.rekoo.manager
 		 */		
 		public function dispose(name_:String):void
 		{
-			if(_modules[name_]==null)
+			if(_modules[name_] == null)
 			{
-				throw new Error("不存在这个模块或模块已被销毁");
+				//throw new Error("不存在这个模块或模块已被销毁");
 				return;
 			}
 			
@@ -77,9 +79,9 @@ package com.rekoo.manager
 		{
 			var _module:IRKModule = getModule(moduleName_);
 			
-			if ( !_module )
+			if ( _module == null )
 			{
-				throw new Error("不存在这个模块或模块已被销毁！");
+				//throw new Error("不存在这个模块或模块已被销毁！");
 			}
 			
 			return _module.call(protocol_, params_);

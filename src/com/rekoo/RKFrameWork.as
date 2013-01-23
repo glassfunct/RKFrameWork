@@ -16,8 +16,6 @@ package com.rekoo
 		
 		/**
 		 * 初始化框架。
-		 * @param APP_Width_ 应用宽度。
-		 * @param APP_Height_ 应用高度。
 		 * @param requestBaseURL_ 请求根域名。
 		 * @param assetsBaseURL_ 素材根目录。
 		 * 

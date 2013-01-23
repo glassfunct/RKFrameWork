@@ -28,6 +28,11 @@ package com.rekoo.remoting
 		/* 素材类型。 */
 		private var _resourceType:String = null;
 		
+		private var _bytes:ByteArray = null;
+		private var _context:LoaderContext = null;
+		private var _retryTimes:int = 0;
+		private var _curRetryTimes:int = 0;
+		
 		private var _onResult:Function = null;
 		private var _onFault:Function = null;
 		
@@ -37,15 +42,16 @@ package com.rekoo.remoting
 		 * 显示对象加载器，扩展自Loader。 
 		 * @param baseURL_ 基本URL。
 		 * @param hashedURL_ 哈希后的URL。
-		 * @param loaderContext_ LoaderContext。
+		 * @param retryTimes_ 重试次数。
 		 * 
 		 */		
-		public function RKResourceLoader(baseURL_:String, hashedURL_:String = null)
+		public function RKResourceLoader(baseURL_:String, hashedURL_:String = null, retryTimes_:int = 3)
 		{
 			super();
 			
 			_baseURL = baseURL_;
 			_hashedURL = hashedURL_ ? hashedURL_ : baseURL_;
+			_retryTimes = retryTimes_;
 			
 			if ( _baseURL )
 			{
@@ -77,6 +83,8 @@ package com.rekoo.remoting
 		{
 			_onResult = onResult_;
 			_onFault = onFault_;
+			_bytes = bytes_;
+			_context = context_;
 			
 			contentLoaderInfo.addEventListener(Event.COMPLETE, onResult);
 			contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onFault);
@@ -160,9 +168,17 @@ package com.rekoo.remoting
 		{
 			clearEvent();
 			
-			if ( _onFault != null )
+			if ( _curRetryTimes < _retryTimes )
 			{
-				_onFault(this);
+				execute(_onResult, _onFault, _bytes, _context);
+				_curRetryTimes ++;
+			}
+			else
+			{
+				if ( _onFault != null )
+				{
+					_onFault(this);
+				}
 			}
 		}
 		

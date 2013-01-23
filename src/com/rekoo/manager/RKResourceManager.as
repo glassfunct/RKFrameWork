@@ -21,8 +21,11 @@ package com.rekoo.manager
 	 */	
 	public final class RKResourceManager extends EventDispatcher
 	{
-		/** 允许的最大链接数 */
+		/** 允许的最大链接数。 */
 		public static const MAX_CONNECTIONS:int = 1;
+		
+		/** 重试次数。 */
+		public static const RETRY_TIMES:int = 3;
 		
 		public static const USE_APPLICATION_DOMAIN:Boolean = true;
 		
@@ -109,7 +112,7 @@ package com.rekoo.manager
 		 * @param url_ 素材URL。
 		 * 
 		 */		
-		public function loadNow(url_:String, binaryMode_:Boolean = false):void
+		public function loadNow(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null):void
 		{
 			if ( isLoading(url_) )
 			{
@@ -121,7 +124,7 @@ package com.rekoo.manager
 			}
 			else
 			{
-				startLoad(url_);
+				startLoad(url_, binaryMode_, onComplete_, onFault_);
 			}
 			
 			_totalFilesInProgress ++;
@@ -133,7 +136,7 @@ package com.rekoo.manager
 		 * @param url_ 素材URL。
 		 * @param binaryMode_ 是否加载为二进制数组。
 		 */		
-		public function load(url_:String, binaryMode_:Boolean = false):void
+		public function load(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null):void
 		{
 			if ( isLoading(url_) )
 			{
@@ -147,11 +150,11 @@ package com.rekoo.manager
 			{
 				if ( _resLoadingURL.length < MAX_CONNECTIONS )
 				{
-					startLoad(url_, binaryMode_);
+					startLoad(url_, binaryMode_, onComplete_, onFault_);
 				}
 				else
 				{
-					delayLoad(url_, binaryMode_);
+					delayLoad(url_, binaryMode_, onComplete_, onFault_);
 				}
 			}
 			
@@ -159,19 +162,19 @@ package com.rekoo.manager
 			_noLoadFilesInProgress ++;
 		}
 		
-		private function startLoad(url_:String, binaryMode_:Boolean = false):void
+		private function startLoad(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null):void
 		{
 			//trace("开始加载:", url_);
 			
-			_resLoadingURL.push({"url":url_, "bin_mode":binaryMode_});
+			_resLoadingURL.push({"url":url_, "bin_mode":binaryMode_, "complete":onComplete_, "fault":onFault_});
 			
 			var _resType:String = binaryMode_ ? RKResourceType.RESOURCE_TYPE_BINARY : RKResourceType.getResourceType(url_);
 			
 			if ( (_resType == RKResourceType.RESOURCE_TYPE_SWF || _resType == RKResourceType.RESOURCE_TYPE_IMG) )
 			{
-				var _loader:RKResourceLoader = new RKResourceLoader(url_, getHashedURL(url_));
+				var _loader:RKResourceLoader = new RKResourceLoader(url_, getHashedURL(url_), RETRY_TIMES);
 				
-				_loader.execute(loadSingleCompleteHandler, loadErr, null, USE_APPLICATION_DOMAIN ? new LoaderContext(false, ApplicationDomain.currentDomain) : null);
+				_loader.execute(loadSingleCompleteHandler, loadSingleFaultHandler, null, USE_APPLICATION_DOMAIN ? new LoaderContext(false, ApplicationDomain.currentDomain) : null);
 				
 				_resLoadingLoader.push(_loader);
 			}
@@ -184,17 +187,17 @@ package com.rekoo.manager
 					_urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 				}
 				
-				_urlLoader.execute(loadSingleCompleteHandler, loadErr);
+				_urlLoader.execute(loadSingleCompleteHandler, loadSingleFaultHandler);
 				
 				_resLoadingLoader.push(_urlLoader);
 			}
 		}
 		
-		private function delayLoad(url_:String, binaryMode_:Boolean = false):void
+		private function delayLoad(url_:String, binaryMode_:Boolean = false,  onComplete_:Function = null, onFault_:Function = null):void
 		{
 			//trace("准备加载:", url_);
 			
-			_resToLoadURL.push({"url":url_, "bin_mode":binaryMode_});
+			_resToLoadURL.push({"url":url_, "bin_mode":binaryMode_, "complete":onComplete_, "fault":onFault_});
 		}
 		
 		private function loadSingleCompleteHandler(target_:*):void
@@ -226,6 +229,11 @@ package com.rekoo.manager
 			{
 				if ( _urlObj == _resLoadingURL[_i]["url"] )
 				{
+					if ( _resLoadingURL[_i]["complete"] != null )
+					{
+						_resLoadingURL[_i]["complete"]();
+					}
+					
 					_resLoadingURL.splice(_i, 1);
 					_resLoadingLoader.splice(_i, 1);
 					break;
@@ -246,7 +254,7 @@ package com.rekoo.manager
 			if ( _resLoadingURL.length < MAX_CONNECTIONS && _resToLoadURL.length )
 			{
 				_urlObj = _resToLoadURL.shift();
-				startLoad(_urlObj["url"], _urlObj["bin_mode"]);
+				startLoad(_urlObj["url"], _urlObj["bin_mode"], _urlObj["complete"], _urlObj["err"]);
 			}
 			
 			if ( _resLoadingURL.length == 0 && _resToLoadURL.length == 0 )
@@ -257,7 +265,7 @@ package com.rekoo.manager
 			}
 		}
 		
-		private function loadErr(evt_:*):void
+		private function loadSingleFaultHandler(target_:*):void
 		{
 			
 		}
@@ -267,7 +275,7 @@ package com.rekoo.manager
 		 * @param definitionName_ 导出类的完全类名。
 		 * @return Class。
 		 * 
-		 */		
+		 */
 		public function getResourceClass(definitionName_:String):Class
 		{
 			var CLS:Class = null;

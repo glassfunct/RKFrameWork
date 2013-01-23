@@ -1,6 +1,6 @@
 package com.rekoo.interfaces
 {
-	public interface IRKModule
+	public interface IRKModule extends IRKSubscriber
 	{
 		/**
 		 * 初始化。注册模块时自动调用。
@@ -21,14 +21,6 @@ package com.rekoo.interfaces
 		 * 
 		 */		
 		function call(protocol_:String, ...args_):Object;
-		
-		/**
-		 * 消息订阅者的响应 
-		 * @param protocol_ 协议。
-		 * @param args_ 额外参数。
-		 * 
-		 */		
-		function notify(protocol_:String, ...args_):void;
 		
 		/**
 		 * 销毁模块。

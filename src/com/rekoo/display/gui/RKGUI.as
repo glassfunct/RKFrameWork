@@ -8,6 +8,7 @@ package com.rekoo.display.gui
 	
 	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
+	import flash.display.Sprite;
 	import flash.utils.getQualifiedClassName;
 	
 	/**
@@ -42,14 +43,14 @@ package com.rekoo.display.gui
 			
 			if ( _arr.length == 1 )
 			{
-				_skinDefinitionName = _arr[0] + "SKIN";
+				_skinDefinitionName = _arr[0] + "Skin";
 			}
 			else
 			{
-				_skinDefinitionName = _arr[0] + "." + _arr[1] + "SKIN";
+				_skinDefinitionName = _arr[0] + "." + _arr[1] + "Skin";
 			}
 			
-			skin = new (RKResourceManager.instance.getResourceClass(_skinDefinitionName))() as MovieClip;
+			skin = new (RKResourceManager.instance.getResourceClass(_skinDefinitionName))() as DisplayObject;
 		}
 		
 		/**

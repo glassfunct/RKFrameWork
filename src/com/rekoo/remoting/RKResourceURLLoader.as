@@ -27,6 +27,9 @@ package com.rekoo.remoting
 		/* 素材类型。 */
 		private var _resourceType:String = null;
 		
+		private var _retryTimes:int = 0;
+		private var _curRetryTimes:int = 0;
+		
 		private var _onResult:Function = null;
 		private var _onFault:Function = null;
 		
@@ -37,12 +40,13 @@ package com.rekoo.remoting
 		 * @param baseURL_ 基本URL。
 		 * @param hashedURL_ 哈希后的URL。
 		 */		
-		public function RKResourceURLLoader(baseURL_:String, hashedURL_:String = null)
+		public function RKResourceURLLoader(baseURL_:String, hashedURL_:String = null, retryTimes_:int = 3)
 		{
 			super();
 			
 			_baseURL = baseURL_;
 			_hashedURL = hashedURL_ ? hashedURL_ : baseURL_;
+			_retryTimes = retryTimes_;
 			
 			var _urlArr:Array = baseURL_.split("/");
 			_resourceName = _urlArr[_urlArr.length - 1];
@@ -140,9 +144,17 @@ package com.rekoo.remoting
 		{
 			clearEvent();
 			
-			if ( _onFault != null )
+			if ( _curRetryTimes < _retryTimes )
 			{
-				_onFault(this);
+				execute(_onResult, _onFault);
+				_curRetryTimes ++;
+			}
+			else
+			{
+				if ( _onFault != null )
+				{
+					_onFault(this);
+				}
 			}
 		}
 		
