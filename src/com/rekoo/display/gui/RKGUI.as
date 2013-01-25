@@ -18,6 +18,15 @@ package com.rekoo.display.gui
 	 */	
 	public class RKGUI extends RKSprite implements IRKGUI
 	{
+		/**
+		 * 当添加到舞台上后回调此函数。
+		 */		
+		public var onShow:Function = null;
+		/**
+		 * 当从舞台上移除后回调此函数。
+		 */		
+		public var onHide:Function = null;
+		
 		private var _className:String = null;
 		
 		/**
@@ -33,7 +42,8 @@ package com.rekoo.display.gui
 		
 		/**
 		 * 解析皮肤。默认是通过完整类名去匹配素材里的导出类。 
-		 * 
+		 * 默认皮肤已存在。
+		 * 若皮肤不存在，则需要复写此方法去加载皮肤，当皮肤加载完成后调用super.parseSkin()。
 		 */		
 		protected function parseSkin():void
 		{
@@ -68,6 +78,11 @@ package com.rekoo.display.gui
 			else
 			{
 				_layer.addChild(this);
+				
+				if ( onShow != null )
+				{
+					onShow();
+				}
 			}
 		}
 		
@@ -80,6 +95,11 @@ package com.rekoo.display.gui
 			if ( parent )
 			{
 				parent.removeChild(this);
+				
+				if ( onHide != null )
+				{
+					onHide();
+				}
 			}
 		}
 		
@@ -101,6 +121,13 @@ package com.rekoo.display.gui
 		public function getLayer():String
 		{
 			throw new Error("子类需覆写getLayer"); 
+		}
+		
+		override public function dispose():void
+		{
+			super.dispose();
+			onShow = null;
+			onHide = null;
 		}
 	}
 }

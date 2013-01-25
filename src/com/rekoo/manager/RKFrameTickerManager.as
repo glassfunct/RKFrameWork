@@ -99,16 +99,20 @@ package com.rekoo.manager
 		private function render(evt_:Event):void
 		{
 			var _interval:int = getInterval();
+			var _tFrameRate:int = 0;
+			
 			for each ( var _tickerObj:Object in _list )
 			{
-				if ( _tickerObj["ticker"].frameRate != 0 )
+				_tFrameRate = _tickerObj["ticker"].hasOwnProperty("frameRate") ? _tickerObj["ticker"].frameRate : RKFrameWork.APP_Stage.frameRate;
+				
+				if ( _tFrameRate != 0 )
 				{
 					_tickerObj["frameTimer"] -= _interval;
 					
 					while ( _tickerObj["frameTimer"] < 0 )
 					{
 						_tickerObj["ticker"].tick();
-						_tickerObj["frameTimer"] += 1000 / Math.abs(_tickerObj["ticker"].frameRate);
+						_tickerObj["frameTimer"] += 1000 / Math.abs(_tFrameRate);
 					}
 				}
 			}

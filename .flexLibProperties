@@ -26,6 +26,8 @@
     <classEntry path="com.rekoo.util.RKNumberUtil"/>
     <classEntry path="com.rekoo.geom.RKSize"/>
     <classEntry path="com.rekoo.interfaces.IRKBaseLoader"/>
+    <classEntry path="com.rekoo.display.component.RKToggleButton"/>
+    <classEntry path="com.rekoo.display.component.RKToggleButtonGroup"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

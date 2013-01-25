@@ -19,9 +19,9 @@ package com.rekoo.display.gui.popup
 		 * @param queue_ 是否排队显示。
 		 * 
 		 */	
-		public function RKZoomPopUp(modal_:Boolean, queue_:Boolean)
+		public function RKZoomPopUp()
 		{
-			super(modal_, queue_);
+			super();
 		}
 		
 		override public function show():void
@@ -34,7 +34,7 @@ package com.rekoo.display.gui.popup
 			x += _rect.width / 2;
 			y += _rect.height / 2;
 			
-			TweenLite.to(this, 0.3, {transformAroundCenter:{scale:1.0}});
+			TweenLite.to(this, 0.2, {transformAroundCenter:{scale:1.0}});
 			super.show();
 		}
 	}

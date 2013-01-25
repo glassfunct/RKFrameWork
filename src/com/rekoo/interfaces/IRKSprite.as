@@ -20,6 +20,12 @@ package com.rekoo.interfaces
 		function set skin(value:DisplayObject):void;
 		
 		/**
+		 * <b>皮肤显示后进行初始化。</b>
+		 * 
+		 */
+		function initView():void;
+		
+		/**
 		 * 销毁。 
 		 * 
 		 */
@@ -28,6 +34,10 @@ package com.rekoo.interfaces
 		function get enabled():Boolean;
 		
 		function set enabled(value:Boolean):void;
+		
+		function get selected():Boolean;
+		
+		function set selected(value:Boolean):void;
 		
 		/**
 		 * 返回位图。

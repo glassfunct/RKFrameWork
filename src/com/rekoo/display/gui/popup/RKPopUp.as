@@ -21,12 +21,9 @@ package com.rekoo.display.gui.popup
 		 * @param queue_ 是否排队显示。
 		 * 
 		 */		
-		public function RKPopUp(modal_:Boolean, queue_:Boolean)
+		public function RKPopUp()
 		{
 			super();
-			
-			_modal = modal_;
-			_queue = queue_;
 		}
 
 		public function get modal():Boolean

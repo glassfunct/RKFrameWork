@@ -5,6 +5,7 @@ package com.rekoo.interfaces
 
 	public interface IRKGUI extends IRKSprite
 	{
+		
 		/**
 		 * 显示。 
 		 * 

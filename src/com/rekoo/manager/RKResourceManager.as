@@ -4,10 +4,12 @@ package com.rekoo.manager
 	import com.rekoo.RKResourceType;
 	import com.rekoo.event.RKResourceEvent;
 	import com.rekoo.interfaces.IRKBaseLoader;
+	import com.rekoo.interfaces.IRKFrameTicker;
 	import com.rekoo.remoting.RKResourceLoader;
 	import com.rekoo.remoting.RKResourceURLLoader;
 	
 	import flash.display.BitmapData;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLLoaderDataFormat;
 	import flash.system.ApplicationDomain;
@@ -19,20 +21,19 @@ package com.rekoo.manager
 	 * @author Administrator
 	 * 
 	 */	
-	public final class RKResourceManager extends EventDispatcher
+	public final class RKResourceManager extends EventDispatcher implements IRKFrameTicker
 	{
-		/** 允许的最大链接数。 */
-		public static const MAX_CONNECTIONS:int = 1;
-		
-		/** 重试次数。 */
-		public static const RETRY_TIMES:int = 3;
-		
 		public static const USE_APPLICATION_DOMAIN:Boolean = true;
 		
 		/* 影响加载进度的所有文件的数量。 */
 		private var _totalFilesInProgress:int = 0;
-		/* 影响加载进度的未加载文件的数量。 */
+		/* 影响加载进度的未加载完成的文件的数量。 */
 		private var _noLoadFilesInProgress:int = 0;
+		
+		/* 影响加载进度且需要显示加载图的所有文件的数量。 */
+		private var _totalSLFilesInProgress:int = 0;
+		/* 影响加载进度且需要显示加载图的未加载完成的文件的数量。 */
+		private var _noLoadSLFilesInProgress:int = 0;
 		
 		/* 所用到的域列表。 */
 		private var _domains:Vector.<ApplicationDomain> = new Vector.<ApplicationDomain>();
@@ -110,9 +111,13 @@ package com.rekoo.manager
 		/**
 		 * 立即加载（无视最大连接数，马上加载）。
 		 * @param url_ 素材URL。
-		 * 
+		 * @param binaryMode_ 是否加载为二进制数组。
+		 * @param onComplete_ 加载成功的回调函数。
+		 * @param onFault_ 加载失败的回调函数。
+		 * @param effectLoadingPer_ 是否影响加载进度。
+		 * @param showLoading_ 是否显示loading图（需和effectLoadingPer_配合使用，effectLoadingPer_为false时，showLoading_无效）。
 		 */		
-		public function loadNow(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null):void
+		public function loadNow(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
 		{
 			if ( isLoading(url_) )
 			{
@@ -124,19 +129,20 @@ package com.rekoo.manager
 			}
 			else
 			{
-				startLoad(url_, binaryMode_, onComplete_, onFault_);
+				startLoad(url_, binaryMode_, onComplete_, onFault_, showLoading_);
 			}
-			
-			_totalFilesInProgress ++;
-			_noLoadFilesInProgress ++;
 		}
 		
 		/**
 		 * 正常加载。若当前正在加载的素材数量已达最大连接数，则放入待加载队列中。
 		 * @param url_ 素材URL。
 		 * @param binaryMode_ 是否加载为二进制数组。
-		 */		
-		public function load(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null):void
+		 * @param onComplete_ 加载成功的回调函数。
+		 * @param onFault_ 加载失败的回调函数。
+		 * @param effectLoadingPer_ 是否影响加载进度。
+		 * @param showLoading_ 是否显示loading图（需和effectLoadingPer_配合使用，effectLoadingPer_为false时，showLoading_无效）。
+		 */
+		public function load(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
 		{
 			if ( isLoading(url_) )
 			{
@@ -148,31 +154,40 @@ package com.rekoo.manager
 			}
 			else
 			{
-				if ( _resLoadingURL.length < MAX_CONNECTIONS )
+				if ( _resLoadingURL.length < RKFrameWork.resLoadMaxConnections )
 				{
-					startLoad(url_, binaryMode_, onComplete_, onFault_);
+					startLoad(url_, binaryMode_, onComplete_, onFault_, effectLoadingPer_, showLoading_);
 				}
 				else
 				{
-					delayLoad(url_, binaryMode_, onComplete_, onFault_);
+					delayLoad(url_, binaryMode_, onComplete_, onFault_, effectLoadingPer_, showLoading_);
+				}
+			}
+		}
+		
+		private function startLoad(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
+		{
+			if ( effectLoadingPer_ )
+			{
+				_totalFilesInProgress ++;
+				_noLoadFilesInProgress ++;
+				
+				if ( showLoading_ )
+				{
+					_totalSLFilesInProgress ++;
+					_noLoadSLFilesInProgress ++;
 				}
 			}
 			
-			_totalFilesInProgress ++;
-			_noLoadFilesInProgress ++;
-		}
-		
-		private function startLoad(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null):void
-		{
 			//trace("开始加载:", url_);
 			
-			_resLoadingURL.push({"url":url_, "bin_mode":binaryMode_, "complete":onComplete_, "fault":onFault_});
+			_resLoadingURL.push({"url":url_, "bin_mode":binaryMode_, "complete":onComplete_, "fault":onFault_, "effectLoadingPer":effectLoadingPer_, "showLoading":showLoading_});
 			
 			var _resType:String = binaryMode_ ? RKResourceType.RESOURCE_TYPE_BINARY : RKResourceType.getResourceType(url_);
 			
 			if ( (_resType == RKResourceType.RESOURCE_TYPE_SWF || _resType == RKResourceType.RESOURCE_TYPE_IMG) )
 			{
-				var _loader:RKResourceLoader = new RKResourceLoader(url_, getHashedURL(url_), RETRY_TIMES);
+				var _loader:RKResourceLoader = new RKResourceLoader(url_, getHashedURL(url_), effectLoadingPer_, showLoading_);
 				
 				_loader.execute(loadSingleCompleteHandler, loadSingleFaultHandler, null, USE_APPLICATION_DOMAIN ? new LoaderContext(false, ApplicationDomain.currentDomain) : null);
 				
@@ -180,7 +195,7 @@ package com.rekoo.manager
 			}
 			else
 			{
-				var _urlLoader:RKResourceURLLoader = new RKResourceURLLoader(url_, getHashedURL(url_));
+				var _urlLoader:RKResourceURLLoader = new RKResourceURLLoader(url_, getHashedURL(url_), effectLoadingPer_, showLoading_);
 				
 				if ( binaryMode_ )
 				{
@@ -191,13 +206,37 @@ package com.rekoo.manager
 				
 				_resLoadingLoader.push(_urlLoader);
 			}
+			
+			if ( showLoading_ && effectLoadingPer_ && RKFrameWork.loadingDisContainer != null && RKFrameWork.resLoadingDis != null )
+			{
+				if ( !RKFrameWork.loadingDisContainer.contains(RKFrameWork.resLoadingDis) )
+				{
+					RKFrameWork.loadingDisContainer.addChild(RKFrameWork.resLoadingDis);
+					updateLoadingDisPos(null);
+					RKFrameWork.APP_Stage.addEventListener(Event.RESIZE, updateLoadingDisPos);
+				}
+				
+				RKFrameTickerManager.instance.register(this);
+			}
 		}
 		
-		private function delayLoad(url_:String, binaryMode_:Boolean = false,  onComplete_:Function = null, onFault_:Function = null):void
+		private function delayLoad(url_:String, binaryMode_:Boolean = false,  onComplete_:Function = null, onFault_:Function = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
 		{
+			if ( effectLoadingPer_ )
+			{
+				_totalFilesInProgress ++;
+				_noLoadFilesInProgress ++;
+				
+				if ( showLoading_ )
+				{
+					_totalSLFilesInProgress ++;
+					_noLoadSLFilesInProgress ++;
+				}
+			}
+			
 			//trace("准备加载:", url_);
 			
-			_resToLoadURL.push({"url":url_, "bin_mode":binaryMode_, "complete":onComplete_, "fault":onFault_});
+			_resToLoadURL.push({"url":url_, "bin_mode":binaryMode_, "complete":onComplete_, "fault":onFault_, "effectLoadingPer":effectLoadingPer_, "showLoading":showLoading_});
 		}
 		
 		private function loadSingleCompleteHandler(target_:*):void
@@ -234,8 +273,19 @@ package com.rekoo.manager
 						_resLoadingURL[_i]["complete"]();
 					}
 					
+					if ( _resLoadingURL[_i]["effectLoadingPer"] )
+					{
+						_noLoadFilesInProgress --;
+						
+						if ( _resLoadingURL[_i]["showLoading"] )
+						{
+							_noLoadSLFilesInProgress --;
+						}
+					}
+					
 					_resLoadingURL.splice(_i, 1);
 					_resLoadingLoader.splice(_i, 1);
+					
 					break;
 				}
 			}
@@ -247,20 +297,21 @@ package com.rekoo.manager
 				(target_ as RKResourceLoader).unloadAndStop();
 			}
 			
-			_noLoadFilesInProgress --;
-			
 			dispatchEvent(new RKResourceEvent(RKResourceEvent.EVENT_COMPLETE_SINGLE_FILE, String(_urlObj)));
 			
-			if ( _resLoadingURL.length < MAX_CONNECTIONS && _resToLoadURL.length )
+			if ( _resLoadingURL.length < RKFrameWork.resLoadMaxConnections && _resToLoadURL.length )
 			{
 				_urlObj = _resToLoadURL.shift();
-				startLoad(_urlObj["url"], _urlObj["bin_mode"], _urlObj["complete"], _urlObj["err"]);
+				startLoad(_urlObj["url"], _urlObj["bin_mode"], _urlObj["complete"], _urlObj["fault"], _urlObj["effectLoadingPer"], _urlObj["showLoading"]);
 			}
 			
 			if ( _resLoadingURL.length == 0 && _resToLoadURL.length == 0 )
 			{
 				//trace("资源队列全部加载完成");
-				
+				_totalFilesInProgress = 0;
+				_totalSLFilesInProgress = 0;
+				_noLoadFilesInProgress = 0;
+				_noLoadSLFilesInProgress = 0;
 				dispatchEvent(new RKResourceEvent(RKResourceEvent.EVENT_COMPLETE_ALL));
 			}
 		}
@@ -322,9 +373,8 @@ package com.rekoo.manager
 		}
 		
 		/**
-		 * 资源加载百分比（0--1）。
+		 * 所有影响加载进度的资源加载百分比（0--1）。
 		 * @return Number。
-		 * 
 		 */		
 		public function get loadingPercent():Number
 		{
@@ -335,12 +385,39 @@ package com.rekoo.manager
 			
 			var loadingPercent:Number = 0;
 			
-			for each (var _loader:Object in _resLoadingLoader)
+			for each (var _loader:IRKBaseLoader in _resLoadingLoader)
 			{
-				loadingPercent += _loader.percent;
+				if ( _loader.effectLoadingPer )
+				{
+					loadingPercent += _loader.percent;
+				}
 			}
 			
 			return ((_totalFilesInProgress - _noLoadFilesInProgress) + loadingPercent) / _totalFilesInProgress;
+		}
+		
+		/**
+		 * 所有影响加载进度且显示加载图的资源加载百分比（0--1）。
+		 * @return Number。
+		 */		
+		public function get loadingPercentSL():Number
+		{
+			if ( _totalSLFilesInProgress == 0 )
+			{
+				return 1;
+			}
+			
+			var loadingPercent:Number = 0;
+			
+			for each (var _loader:IRKBaseLoader in _resLoadingLoader)
+			{
+				if ( _loader.showLoading && _loader.effectLoadingPer )
+				{
+					loadingPercent += _loader.percent;
+				}
+			}
+			
+			return ((_totalSLFilesInProgress - _noLoadSLFilesInProgress) + loadingPercent) / _totalSLFilesInProgress;
 		}
 		
 		/**
@@ -382,6 +459,44 @@ package com.rekoo.manager
 			}
 			
 			return RKFrameWork.assetsBaseURL + url_;
+		}
+		
+		public function tick():void
+		{
+			var _progress:Number = loadingPercentSL;
+			
+			if ( _progress >= 1.0 && _noLoadSLFilesInProgress == 0 )
+			{
+				RKFrameTickerManager.instance.unregister(this);
+				RKFrameWork.APP_Stage.removeEventListener(Event.RESIZE, updateLoadingDisPos);
+				
+				if ( RKFrameWork.loadingDisContainer != null && RKFrameWork.resLoadingDis != null )
+				{
+					if ( RKFrameWork.loadingDisContainer.contains(RKFrameWork.resLoadingDis) )
+					{
+						RKFrameWork.loadingDisContainer.removeChild(RKFrameWork.resLoadingDis);
+					}
+					
+					RKFrameWork.loadingDisContainer.graphics.clear();
+				}
+				
+				return;
+			}
+			
+			if ( RKFrameWork.resLoadingDis.hasOwnProperty("pLabel") )
+			{
+				RKFrameWork.resLoadingDis["pLabel"].text = (int(_progress * 100) + "%");
+			}
+		}
+		
+		private function updateLoadingDisPos(evt_:Event):void
+		{
+			RKFrameWork.resLoadingDis.x = RKFrameWork.APP_Width / 2;
+			RKFrameWork.resLoadingDis.y = RKFrameWork.APP_Height / 2;
+			RKFrameWork.loadingDisContainer.graphics.clear();
+			RKFrameWork.loadingDisContainer.graphics.beginFill(0x000000, 0.4);
+			RKFrameWork.loadingDisContainer.graphics.drawRect(0, 0, RKFrameWork.APP_Width, RKFrameWork.APP_Height);
+			RKFrameWork.loadingDisContainer.graphics.endFill();
 		}
 	}
 }

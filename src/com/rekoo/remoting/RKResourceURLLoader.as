@@ -1,5 +1,6 @@
 package com.rekoo.remoting
 {
+	import com.rekoo.RKFrameWork;
 	import com.rekoo.RKResourceType;
 	import com.rekoo.interfaces.IRKBaseLoader;
 	import com.rekoo.manager.RKResourceManager;
@@ -33,20 +34,27 @@ package com.rekoo.remoting
 		private var _onResult:Function = null;
 		private var _onFault:Function = null;
 		
+		private var _effectLoadingPer:Boolean = false;
+		private var _showLoading:Boolean = false;
+		
 		private var _resManager:RKResourceManager = RKResourceManager.instance;
 		
 		/**
 		 * 非显示对象静态资源加载器，扩展自URLLoader。
 		 * @param baseURL_ 基本URL。
 		 * @param hashedURL_ 哈希后的URL。
+		 * @param effectLoadingPer_ 是否影响加载进度。
+		 * @param showLoading_ 是否显示loading图（需和effectLoadingPer_配合使用，effectLoadingPer_为false时，showLoading_无效）。
 		 */		
-		public function RKResourceURLLoader(baseURL_:String, hashedURL_:String = null, retryTimes_:int = 3)
+		public function RKResourceURLLoader(baseURL_:String, hashedURL_:String = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true)
 		{
 			super();
 			
 			_baseURL = baseURL_;
 			_hashedURL = hashedURL_ ? hashedURL_ : baseURL_;
-			_retryTimes = retryTimes_;
+			_effectLoadingPer = effectLoadingPer_;
+			_showLoading = showLoading_;
+			_retryTimes = RKFrameWork.resLoadMaxRetryTimes;
 			
 			var _urlArr:Array = baseURL_.split("/");
 			_resourceName = _urlArr[_urlArr.length - 1];
@@ -163,6 +171,16 @@ package com.rekoo.remoting
 			removeEventListener(Event.COMPLETE, onResult);
 			removeEventListener(IOErrorEvent.IO_ERROR, onFault);
 			removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onFault);
+		}
+		
+		public function get effectLoadingPer():Boolean
+		{
+			return _effectLoadingPer;
+		}
+		
+		public function get showLoading():Boolean
+		{
+			return _showLoading;
 		}
 	}
 }

@@ -46,15 +46,20 @@ package com.rekoo.manager
 		/**
 		 * 显示弹框。 
 		 * @param popUp_ 框。
+		 * @param modal_ 是否模态显示。
+		 * @param queue_ 是否放入队列。放入队列的话会等前一个弹框关闭后才显示，否则立刻显示。
 		 * @param align_ 对齐方式。
 		 * @param offset_ 坐标偏移量。
 		 */		
-		public function show(popUp_:RKPopUp, align_:String = RKDisplayAlign.CENTER, offset_:Point = null):void
+		public function show(popUp_:RKPopUp, modal_:Boolean, queue_:Boolean, align_:String = RKDisplayAlign.CENTER, offset_:Point = null):void
 		{
 			if ( !popUp_ is RKPopUp )
 			{
 				throw new Error("RKPopUpManager的show方法只接受RKPopUp类型的GUI！");
 			}
+			
+			popUp_.modal = modal_;
+			popUp_.queue = queue_;
 			
 			if ( popUp_.queue )
 			{
@@ -100,7 +105,7 @@ package com.rekoo.manager
 			var _layer:RKLayer = RKLayerManager.instance.getLayer(popUp_.getLayer());
 			
 			_modalPopUpMask.graphics.clear();
-			_modalPopUpMask.graphics.beginFill(0, 0.4);
+			_modalPopUpMask.graphics.beginFill(0x000000, 0.4);
 			_modalPopUpMask.graphics.drawRect(0, 0, RKFrameWork.APP_Width, RKFrameWork.APP_Height);
 			_modalPopUpMask.graphics.endFill();
 			

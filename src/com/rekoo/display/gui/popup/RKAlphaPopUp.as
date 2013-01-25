@@ -16,9 +16,9 @@ package com.rekoo.display.gui.popup
 		 * @param queue_ 是否排队显示。
 		 * 
 		 */			
-		public function RKAlphaPopUp(modal_:Boolean, queue_:Boolean)
+		public function RKAlphaPopUp()
 		{
-			super(modal_, queue_);
+			super();
 		}
 		
 		override public function show():void

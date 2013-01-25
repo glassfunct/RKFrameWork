@@ -1,5 +1,6 @@
 package com.rekoo.remoting
 {
+	import com.rekoo.RKFrameWork;
 	import com.rekoo.RKResourceType;
 	import com.rekoo.interfaces.IRKBaseLoader;
 	import com.rekoo.manager.RKResourceManager;
@@ -36,22 +37,26 @@ package com.rekoo.remoting
 		private var _onResult:Function = null;
 		private var _onFault:Function = null;
 		
+		private var _effectLoadingPer:Boolean = false;
+		private var _showLoading:Boolean = false;
+		
 		private var _resManager:RKResourceManager = RKResourceManager.instance;
 		
 		/**
 		 * 显示对象加载器，扩展自Loader。 
 		 * @param baseURL_ 基本URL。
 		 * @param hashedURL_ 哈希后的URL。
-		 * @param retryTimes_ 重试次数。
-		 * 
+		 * @param effectLoadingPer_ 是否影响加载进度。
+		 * @param showLoading_ 是否显示loading图（需和effectLoadingPer_配合使用，effectLoadingPer_为false时，showLoading_无效）。
 		 */		
-		public function RKResourceLoader(baseURL_:String, hashedURL_:String = null, retryTimes_:int = 3)
+		public function RKResourceLoader(baseURL_:String, hashedURL_:String = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true)
 		{
 			super();
 			
 			_baseURL = baseURL_;
 			_hashedURL = hashedURL_ ? hashedURL_ : baseURL_;
-			_retryTimes = retryTimes_;
+			_showLoading = showLoading_;
+			_retryTimes = RKFrameWork.resLoadMaxRetryTimes;
 			
 			if ( _baseURL )
 			{
@@ -208,7 +213,15 @@ package com.rekoo.remoting
 		{
 			_onFault = value;
 		}
-
-
+		
+		public function get effectLoadingPer():Boolean
+		{
+			return _effectLoadingPer;
+		}
+		
+		public function get showLoading():Boolean
+		{
+			return _showLoading;
+		}
 	}
 }

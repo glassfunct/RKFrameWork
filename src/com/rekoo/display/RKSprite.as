@@ -23,6 +23,7 @@ package com.rekoo.display
 		private var _skin:DisplayObject = null;
 		private var _capture:Bitmap = new Bitmap(null, "auto", true);
 		private var _enabled:Boolean = false;
+		private var _selected:Boolean = false;
 		
 		private var _evtDic:Dictionary = new Dictionary();
 		private var _dragable:Boolean = false;
@@ -86,6 +87,17 @@ package com.rekoo.display
 				_skin.y = 0;
 				addChild(_skin);
 			}
+			
+			initView();
+		}
+		
+		/**
+		 * <b>皮肤显示后进行初始化。</b>
+		 * 
+		 */
+		public function initView():void
+		{
+			
 		}
 		
 		/**
@@ -154,6 +166,16 @@ package com.rekoo.display
 		public function set enabled(value:Boolean):void
 		{
 			_enabled = value;
+		}
+		
+		public function get selected():Boolean
+		{
+			return _selected;
+		}
+		
+		public function set selected(value:Boolean):void
+		{
+			_selected = value;
 		}
 		
 		override public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
