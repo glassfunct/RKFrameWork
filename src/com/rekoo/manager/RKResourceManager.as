@@ -167,6 +167,17 @@ package com.rekoo.manager
 		
 		private function startLoad(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
 		{
+			if ( _resDic.hasOwnProperty(url_) )
+			{
+				if ( onComplete_ != null )
+				{
+					onComplete_();
+				}
+				
+				this.loadSingleCompleteHandler(url_);
+				return;
+			}
+			
 			if ( effectLoadingPer_ )
 			{
 				_totalFilesInProgress ++;
@@ -187,7 +198,7 @@ package com.rekoo.manager
 			
 			if ( (_resType == RKResourceType.RESOURCE_TYPE_SWF || _resType == RKResourceType.RESOURCE_TYPE_IMG) )
 			{
-				var _loader:RKResourceLoader = new RKResourceLoader(url_, getHashedURL(url_), effectLoadingPer_, showLoading_);
+				var _loader:RKResourceLoader = new RKResourceLoader(url_, getResHashedURL(url_), effectLoadingPer_, showLoading_);
 				
 				_loader.execute(loadSingleCompleteHandler, loadSingleFaultHandler, null, USE_APPLICATION_DOMAIN ? new LoaderContext(false, ApplicationDomain.currentDomain) : null);
 				
@@ -195,14 +206,9 @@ package com.rekoo.manager
 			}
 			else
 			{
-				var _urlLoader:RKResourceURLLoader = new RKResourceURLLoader(url_, getHashedURL(url_), effectLoadingPer_, showLoading_);
+				var _urlLoader:RKResourceURLLoader = new RKResourceURLLoader(url_, getResHashedURL(url_), effectLoadingPer_, showLoading_);
 				
-				if ( binaryMode_ )
-				{
-					_urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
-				}
-				
-				_urlLoader.execute(loadSingleCompleteHandler, loadSingleFaultHandler);
+				_urlLoader.execute(loadSingleCompleteHandler, loadSingleFaultHandler, binaryMode_);
 				
 				_resLoadingLoader.push(_urlLoader);
 			}
@@ -243,63 +249,70 @@ package com.rekoo.manager
 		{
 			var _urlObj:Object = null;
 			
-			if ( target_.resourceType == RKResourceType.RESOURCE_TYPE_SWF )
+			if ( target_ is IRKBaseLoader )
 			{
-				if ( _domains.indexOf(target_.contentLoaderInfo.applicationDomain) == -1 )
+				if ( target_.resourceType == RKResourceType.RESOURCE_TYPE_SWF )
 				{
-					_domains.push(target_.contentLoaderInfo.applicationDomain);
+					if ( _domains.indexOf(target_.contentLoaderInfo.applicationDomain) == -1 )
+					{
+						_domains.push(target_.contentLoaderInfo.applicationDomain);
+					}
+					
+					_resDic[target_.baseURL] = target_.content;
+				}
+				else if ( target_.resourceType == RKResourceType.RESOURCE_TYPE_IMG ) 
+				{
+					_resDic[target_.baseURL] = target_.content.bitmapData.clone();
+					(target_ as RKResourceLoader).unloadAndStop();
+				}
+				else
+				{
+					_resDic[target_.baseURL] = target_.data;
 				}
 				
-				_resDic[target_.baseURL] = target_.content;
-			}
-			else if ( target_.resourceType == RKResourceType.RESOURCE_TYPE_IMG ) 
-			{
-				_resDic[target_.baseURL] = target_.content.bitmapData.clone();
-				(target_ as RKResourceLoader).unloadAndStop();
+				_urlObj = target_.baseURL;
+				
+				for ( var _i:int = 0; _i < _resLoadingURL.length; _i ++ )
+				{
+					if ( _urlObj == _resLoadingURL[_i]["url"] )
+					{
+						if ( _resLoadingURL[_i]["complete"] != null )
+						{
+							_resLoadingURL[_i]["complete"]();
+						}
+						
+						if ( _resLoadingURL[_i]["effectLoadingPer"] )
+						{
+							_noLoadFilesInProgress --;
+							
+							if ( _resLoadingURL[_i]["showLoading"] )
+							{
+								_noLoadSLFilesInProgress --;
+							}
+						}
+						
+						_resLoadingURL.splice(_i, 1);
+						_resLoadingLoader.splice(_i, 1);
+						
+						break;
+					}
+				}
+				
+				//trace("加载完成:",_urlObj);
+				
+				if ( target_ is RKResourceLoader )
+				{
+					(target_ as RKResourceLoader).unloadAndStop();
+				}
 			}
 			else
 			{
-				_resDic[target_.baseURL] = target_.data;
-			}
-			
-			_urlObj = target_.baseURL;
-			
-			for ( var _i:int = 0; _i < _resLoadingURL.length; _i ++ )
-			{
-				if ( _urlObj == _resLoadingURL[_i]["url"] )
-				{
-					if ( _resLoadingURL[_i]["complete"] != null )
-					{
-						_resLoadingURL[_i]["complete"]();
-					}
-					
-					if ( _resLoadingURL[_i]["effectLoadingPer"] )
-					{
-						_noLoadFilesInProgress --;
-						
-						if ( _resLoadingURL[_i]["showLoading"] )
-						{
-							_noLoadSLFilesInProgress --;
-						}
-					}
-					
-					_resLoadingURL.splice(_i, 1);
-					_resLoadingLoader.splice(_i, 1);
-					
-					break;
-				}
-			}
-			
-			//trace("加载完成:",_urlObj);
-			
-			if ( target_ is RKResourceLoader )
-			{
-				(target_ as RKResourceLoader).unloadAndStop();
+				_urlObj = target_;
 			}
 			
 			dispatchEvent(new RKResourceEvent(RKResourceEvent.EVENT_COMPLETE_SINGLE_FILE, String(_urlObj)));
 			
-			if ( _resLoadingURL.length < RKFrameWork.resLoadMaxConnections && _resToLoadURL.length )
+			if ( _resLoadingURL.length < RKFrameWork.resLoadMaxConnections && _resToLoadURL.length > 0 )
 			{
 				_urlObj = _resToLoadURL.shift();
 				startLoad(_urlObj["url"], _urlObj["bin_mode"], _urlObj["complete"], _urlObj["fault"], _urlObj["effectLoadingPer"], _urlObj["showLoading"]);
@@ -451,7 +464,13 @@ package com.rekoo.manager
 			_hashMap = value;
 		}
 		
-		private function getHashedURL(url_:String):String
+		/**
+		 * 返回指定资源url的哈希映射。
+		 * @param url_ 资源URL。
+		 * @return 哈希映射。
+		 * 
+		 */		
+		public function getResHashedURL(url_:String):String
 		{
 			if ( _hashMap.hasOwnProperty(url_) )
 			{

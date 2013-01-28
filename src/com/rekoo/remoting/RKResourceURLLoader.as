@@ -70,15 +70,16 @@ package com.rekoo.remoting
 		 * 开始加载。
 		 * @param onResult_ 加载成功的回调函数。
 		 * @param onFault_ 加载失败的回调函数。
-		 * 
+		 * @param binaryMode_ 加载为二进制。
 		 */			
-		public function execute(onResult_:Function, onFault_:Function = null):void
+		public function execute(onResult_:Function, onFault_:Function = null, binaryMode_:Boolean = false):void
 		{
 			_onResult = onResult_;
 			_onFault = onFault_;
 			
-			if ( dataFormat == URLLoaderDataFormat.BINARY )
+			if ( binaryMode_ )
 			{
+				dataFormat = URLLoaderDataFormat.BINARY
 				_resourceType = RKResourceType.RESOURCE_TYPE_BINARY;
 			}
 			
