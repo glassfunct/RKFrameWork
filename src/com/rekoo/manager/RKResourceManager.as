@@ -342,15 +342,24 @@ package com.rekoo.manager
 		 */
 		public function getResourceClass(definitionName_:String):Class
 		{
+			trace("-------------------------------------------------------------------------");
+			trace("get resource class:", definitionName_);
+			
 			var CLS:Class = null;
 			
 			for each ( var _domain:ApplicationDomain in _domains )
 			{
 				if ( _domain.hasDefinition(definitionName_) )
 				{
+					trace("success");
 					CLS = _domain.getDefinition(definitionName_) as Class;
 					break;
 				}
+			}
+			
+			if ( CLS == null )
+			{
+				trace("fail");
 			}
 			
 			return CLS;

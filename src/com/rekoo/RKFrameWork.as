@@ -111,14 +111,5 @@ package com.rekoo
 		{
 			return _obj["assets_base_url"];
 		}
-		
-		/**
-		 * 注册Layer。
-		 */		
-		public static function registerLayer(layer_:RKLayer):void
-		{
-			APP_Stage.addChild(layer_);
-			RKLayerManager.instance.registerLayer(layer_);
-		}
 	}
 }
