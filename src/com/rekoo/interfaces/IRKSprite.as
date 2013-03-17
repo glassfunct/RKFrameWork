@@ -39,12 +39,46 @@ package com.rekoo.interfaces
 		
 		function set selected(value:Boolean):void;
 		
+		function get selectable():Boolean;
+		
+		function set selectable(value:Boolean):void;
+		
+		function get onSelected():Function;
+		
+		function set onSelected(value:Function):void;
+		
+		function get active():Boolean;
+		
+		function set active(value:Boolean):void;
+		
 		/**
-		 * 返回位图。
-		 * @param refresh_ 是否重新绘制。
-		 * @return Bitmap。
-		 * 
+		 * 添加滤镜。
+		 * @param args BitmapFilter。
 		 */		
-		function getCapture(refresh_:Boolean = true):Bitmap;
+		function applyFilters(...args):void;
+		
+		/**
+		 * 移除滤镜。
+		 * @param args BitmapFilter。
+		 */		
+		function removeFilters(...args):void;
+		
+		/**
+		 * 返回名称。默认是完整类名。 
+		 * @return String。
+		 */
+		function getName():String;
+		
+		function get x():Number;
+		function set x(value:Number):void;
+		
+		function get y():Number;
+		function set y(value:Number):void;
+		
+		function get width():Number;
+		function set width(value:Number):void;
+		
+		function get height():Number;
+		function set height(value:Number):void;
 	}
 }

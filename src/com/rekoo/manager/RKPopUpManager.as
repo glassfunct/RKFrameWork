@@ -1,11 +1,13 @@
 package com.rekoo.manager
 {
-	import com.rekoo.RKDisplayAlign;
 	import com.rekoo.RKFrameWork;
+	import com.rekoo.RKPosition;
 	import com.rekoo.display.gui.popup.RKPopUp;
 	import com.rekoo.display.layer.RKLayer;
+	import com.rekoo.interfaces.IRKPopUp;
 	import com.rekoo.util.RKDisplayObjectUtil;
 	
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Point;
@@ -51,9 +53,9 @@ package com.rekoo.manager
 		 * @param align_ 对齐方式。
 		 * @param offset_ 坐标偏移量。
 		 */		
-		public function show(popUp_:RKPopUp, modal_:Boolean, queue_:Boolean, align_:String = RKDisplayAlign.CENTER, offset_:Point = null):void
+		public function show(popUp_:IRKPopUp, modal_:Boolean = true, queue_:Boolean = false, align_:String = RKPosition.CENTER, offset_:Point = null):void
 		{
-			if ( !popUp_ is RKPopUp )
+			if ( !popUp_ is IRKPopUp )
 			{
 				throw new Error("RKPopUpManager的show方法只接受RKPopUp类型的GUI！");
 			}
@@ -86,10 +88,10 @@ package com.rekoo.manager
 			popUp_.hide();
 		}
 		
-		private function showPopUp(popUp_:RKPopUp, align_:String = RKDisplayAlign.CENTER, offset_:Point = null):void
+		private function showPopUp(popUp_:IRKPopUp, align_:String = RKPosition.CENTER, offset_:Point = null):void
 		{
 			_showingPopUpList.push({"popUp":popUp_, "align":align_, "offset":offset_});
-			RKDisplayObjectUtil.align(popUp_, new Rectangle(0, 0, RKFrameWork.APP_Width, RKFrameWork.APP_Height), align_, offset_);
+			RKDisplayObjectUtil.align((popUp_ as DisplayObject), new Rectangle(0, 0, RKFrameWork.APP_Width, RKFrameWork.APP_Height), align_, offset_);
 			popUp_.show();
 			
 			if ( popUp_.modal )
@@ -97,10 +99,10 @@ package com.rekoo.manager
 				showModalPopUpMask(popUp_);
 			}
 			
-			popUp_.addEventListener(Event.REMOVED_FROM_STAGE, onPopUpClosedHandler);
+			(popUp_ as DisplayObject).addEventListener(Event.REMOVED_FROM_STAGE, onPopUpClosedHandler);
 		}
 		
-		private function showModalPopUpMask(popUp_:RKPopUp):void
+		private function showModalPopUpMask(popUp_:IRKPopUp):void
 		{
 			var _layer:RKLayer = RKLayerManager.instance.getLayer(popUp_.getLayer());
 			
@@ -114,7 +116,7 @@ package com.rekoo.manager
 				_modalPopUpMask.parent.removeChild(_modalPopUpMask);
 			}
 			
-			_layer.addChildAt(_modalPopUpMask, _layer.getChildIndex(popUp_));
+			_layer.addChildAt(_modalPopUpMask, _layer.getChildIndex((popUp_ as DisplayObject)));
 		}
 		
 		private function hidePopUpMask():void

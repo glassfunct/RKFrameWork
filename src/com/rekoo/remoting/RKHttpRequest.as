@@ -1,13 +1,18 @@
 package com.rekoo.remoting
 {
 	import com.rekoo.RKFrameWork;
+	import com.rekoo.interfaces.IRKSprite;
 	
+	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
+	import flash.utils.getDefinitionByName;
+	import flash.utils.getQualifiedClassName;
 
 	/**
 	 * Http请求。
@@ -28,6 +33,11 @@ package com.rekoo.remoting
 		
 		private var _retryTimes:int = 0;
 		private var _curRetryTimes:int = 0;
+		
+		private var _loadingContainer:DisplayObjectContainer = null;
+		private var _loadingMC:DisplayObject = null;
+		
+		private var _inProcess:Boolean = false;
 		
 		/**
 		 * Http请求。
@@ -59,16 +69,19 @@ package com.rekoo.remoting
 		 * @param onResult_ 成功的回调，参数：RKHttpRequest。
 		 * @param onFault_ 失败的回调，参数：RKHttpRequest。
 		 * @param showLoading_ 是否显示loading图。
+		 * @param loadingContainer_ 显示loading图的容器（若容器实现了IRKSprite接口，则在加载过程中其active属性为false，加载完成后变为true）。
 		 */		
-		public function send(onResult_:Function = null, onFault_:Function = null, showLoading_:Boolean = true):void
+		public function send(onResult_:Function = null, onFault_:Function = null, showLoading_:Boolean = true, loadingContainer_:DisplayObjectContainer = null):void
 		{
+			_inProcess = true;
+			
 			if ( RKHttpRequest.requestVect.indexOf(this) == -1 )
 			{
 				RKHttpRequest.requestVect.push(this);
 			}
 			
 			_showLoading = showLoading_;
-			_retryTimes = RKFrameWork.resLoadMaxRetryTimes;
+			_retryTimes = RKFrameWork.httpRequestMaxRetryTimes;
 			
 			_onResult = onResult_;
 			_onFault = _onFault;
@@ -77,10 +90,12 @@ package com.rekoo.remoting
 			_urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onFaultHandler);
 			_urlLoader.addEventListener( SecurityErrorEvent.SECURITY_ERROR, onFaultHandler);
 			_urlLoader.load(_urlRequest);
+			_curRetryTimes ++;
 			
 			if ( showLoading )
 			{
-				RKHttpRequest.showLoading();
+				_loadingContainer = loadingContainer_;
+				sl();
 			}
 		}
 		
@@ -98,7 +113,7 @@ package com.rekoo.remoting
 		 * @param data_ 请求的返回值。
 		 * 
 		 */		
-		protected function onResult(data_:Object):void
+		protected function onResult(data_:*):void
 		{
 			if ( _onResult != null )
 			{
@@ -112,8 +127,7 @@ package com.rekoo.remoting
 			
 			if ( _curRetryTimes < _retryTimes )
 			{
-				send(_onResult, _onFault);
-				_curRetryTimes ++;
+				send(_onResult, _onFault, showLoading, loadingContainer);
 			}
 			else
 			{
@@ -124,6 +138,8 @@ package com.rekoo.remoting
 		
 		private function finish():void
 		{
+			_curRetryTimes = 0;
+			
 			var _index:int = RKHttpRequest.requestVect.indexOf(this);
 			
 			if ( _index != -1 )
@@ -133,8 +149,11 @@ package com.rekoo.remoting
 			
 			if ( showLoading )
 			{
-				RKHttpRequest.hideLoading();
+				hl();
+				_loadingContainer = null;
 			}
+			
+			_inProcess = false;
 		}
 		
 		/**
@@ -142,7 +161,7 @@ package com.rekoo.remoting
 		 * @param data_ 请求的返回值。
 		 * 
 		 */		
-		protected function onFault(data_:Object):void
+		protected function onFault(data_:*):void
 		{
 			if ( _onFault != null )
 			{
@@ -212,31 +231,82 @@ package com.rekoo.remoting
 			return _showLoading;
 		}
 		
-		public static function showLoading():void
+		/**
+		 * 显示loading动画。
+		 */		
+		private function sl():void
 		{
-			if ( RKFrameWork.loadingDisContainer != null && RKFrameWork.requestLoadingDis != null )
+			if ( _loadingContainer != null )
 			{
-				if ( !RKFrameWork.loadingDisContainer.contains(RKFrameWork.requestLoadingDis) )
+				if ( _loadingContainer is IRKSprite )
 				{
-					RKFrameWork.loadingDisContainer.addChild(RKFrameWork.requestLoadingDis);
-					updateLoadingDisPos(null);
+					(_loadingContainer as IRKSprite).active = false;
+				}
+				else
+				{
+					//_loadingContainer.mouseChildren = false;
 				}
 				
-				RKFrameWork.APP_Stage.addEventListener(Event.RESIZE, updateLoadingDisPos);
+				if ( _loadingMC == null )
+				{
+					var _cls:Class = flash.utils.getDefinitionByName(flash.utils.getQualifiedClassName(RKFrameWork.requestLoadingDis)) as Class;
+					_loadingMC = new _cls() as DisplayObject;
+					_loadingMC.x = (_loadingContainer.width - _loadingMC.width) / 2;
+					_loadingMC.y = (_loadingContainer.height - _loadingMC.height) / 2;
+				}
+				
+				if ( !_loadingContainer.contains(_loadingMC) )
+				{
+					_loadingContainer.addChild(_loadingMC);
+				}
+			}
+			else
+			{
+				if ( RKFrameWork.loadingDisContainer != null && RKFrameWork.requestLoadingDis != null )
+				{
+					if ( !RKFrameWork.loadingDisContainer.contains(RKFrameWork.requestLoadingDis) )
+					{
+						RKFrameWork.loadingDisContainer.addChild(RKFrameWork.requestLoadingDis);
+						updateLoadingDisPos(null);
+					}
+					
+					RKFrameWork.APP_Stage.addEventListener(Event.RESIZE, updateLoadingDisPos);
+				}
 			}
 		}
 		
-		public static function hideLoading():void
+		public function get loadingContainer():DisplayObjectContainer
+		{
+			return _loadingContainer;
+		}
+		
+		private function hl():void
 		{
 			var _flag:Boolean = false;
 			
 			for each ( var _request:RKHttpRequest in RKHttpRequest.requestVect )
 			{
-				if ( _request.showLoading )
+				if ( _request.showLoading && _request.loadingContainer == null )
 				{
 					_flag = true;
 					break;
 				}
+			}
+			
+			if ( _loadingContainer )
+			{
+				_loadingContainer.removeChild(_loadingMC);
+				
+				if ( _loadingContainer is IRKSprite )
+				{
+					(_loadingContainer as IRKSprite).active = true;
+				}
+				else
+				{
+					//_loadingContainer.mouseChildren = true;
+				}
+				
+				_loadingContainer = null;
 			}
 			
 			if ( !_flag )
@@ -250,7 +320,10 @@ package com.rekoo.remoting
 						RKFrameWork.loadingDisContainer.removeChild(RKFrameWork.requestLoadingDis);
 					}
 					
-					RKFrameWork.loadingDisContainer.graphics.clear();
+					if ( RKFrameWork.loadingDisContainer.numChildren == 0 )
+					{
+						RKFrameWork.loadingDisContainer.graphics.clear();
+					}
 				}
 			}
 		}
@@ -264,5 +337,14 @@ package com.rekoo.remoting
 			RKFrameWork.loadingDisContainer.graphics.drawRect(0, 0, RKFrameWork.APP_Width, RKFrameWork.APP_Height);
 			RKFrameWork.loadingDisContainer.graphics.endFill();
 		}
+
+		/**
+		 * 是否正在加载。
+		 */
+		public function get inProcess():Boolean
+		{
+			return _inProcess;
+		}
+
 	}
 }

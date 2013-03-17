@@ -1,30 +1,30 @@
 package com.rekoo.display.layer
 {
-	import com.rekoo.display.RKToolTipableSprite;
+	import com.rekoo.display.RKTooltipableSprite;
 
 	/**
 	 * 层。 
 	 * @author Administrator
 	 * 
 	 */	
-	public class RKLayer extends RKToolTipableSprite
+	public class RKLayer extends RKTooltipableSprite
 	{
-		private var _name:String = null;
+		private var _type:String = null;
 		
 		/**
 		 * 层。 
 		 * @param name_ 层名称。
 		 * 
 		 */		
-		public function RKLayer(name_:String)
+		public function RKLayer(type_:String)
 		{
 			super();
-			_name = name_;
+			_type = type_;
 		}
 		
-		public function getName():String
+		public function getType():String
 		{
-			return _name;
+			return _type;
 		}
 	}
 }

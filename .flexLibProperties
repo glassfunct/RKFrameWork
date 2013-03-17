@@ -7,14 +7,13 @@
     <classEntry path="com.rekoo.manager.RKGUIManager"/>
     <classEntry path="com.rekoo.interfaces.IRKGUI"/>
     <classEntry path="com.rekoo.interfaces.IRKPopUp"/>
-    <classEntry path="com.rekoo.util.RKStringUtil"/>
     <classEntry path="com.rekoo.display.component.RKButton"/>
     <classEntry path="com.rekoo.interfaces.IRKSprite"/>
     <classEntry path="com.rekoo.util.RKDisplayObjectUtil"/>
-    <classEntry path="com.rekoo.manager.RKToopTipManager"/>
-    <classEntry path="com.rekoo.RKDisplayAlign"/>
-    <classEntry path="com.rekoo.interfaces.IRKToolTipSkin"/>
-    <classEntry path="com.rekoo.interfaces.IRKToolTipable"/>
+    <classEntry path="com.rekoo.manager.RKTooptipManager"/>
+    <classEntry path="com.rekoo.RKPosition"/>
+    <classEntry path="com.rekoo.interfaces.IRKTooltipSkin"/>
+    <classEntry path="com.rekoo.interfaces.IRKTooltipable"/>
     <classEntry path="com.rekoo.display.RKSprite"/>
     <classEntry path="com.rekoo.manager.RKTimerTickerManager"/>
     <classEntry path="com.rekoo.interfaces.IRKTimerTicker"/>
@@ -23,11 +22,19 @@
     <classEntry path="com.rekoo.interfaces.IRKMovieClip"/>
     <classEntry path="com.rekoo.display.RKMovieClip"/>
     <classEntry path="com.rekoo.display.RKBitmapMovieClip"/>
-    <classEntry path="com.rekoo.util.RKNumberUtil"/>
     <classEntry path="com.rekoo.geom.RKSize"/>
     <classEntry path="com.rekoo.interfaces.IRKBaseLoader"/>
     <classEntry path="com.rekoo.display.component.RKToggleButton"/>
     <classEntry path="com.rekoo.display.component.RKToggleButtonGroup"/>
+    <classEntry path="com.rekoo.RKDirection"/>
+    <classEntry path="com.rekoo.display.component.RKTileList"/>
+    <classEntry path="com.rekoo.interfaces.IRKTile"/>
+    <classEntry path="com.rekoo.display.component.RKTile"/>
+    <classEntry path="com.rekoo.display.component.RKImage"/>
+    <classEntry path="com.rekoo.display.component.RKNumberStepper"/>
+    <classEntry path="com.rekoo.display.component.RKPageStepper"/>
+    <classEntry path="com.rekoo.display.component.RKPageTileList"/>
+    <classEntry path="com.rekoo.util.RKObjectUtil"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

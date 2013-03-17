@@ -88,6 +88,8 @@ package com.rekoo.remoting
 			addEventListener(SecurityErrorEvent.SECURITY_ERROR, onFault);
 			
 			super.load(new URLRequest(_hashedURL));
+			
+			_retryTimes ++;
 		}
 		
 		/**
@@ -141,6 +143,8 @@ package com.rekoo.remoting
 		
 		private function onResult(evt_:Event):void
 		{
+			_retryTimes = 0;
+			
 			clearEvent();
 			
 			if ( _onResult != null )
@@ -156,10 +160,11 @@ package com.rekoo.remoting
 			if ( _curRetryTimes < _retryTimes )
 			{
 				execute(_onResult, _onFault);
-				_curRetryTimes ++;
 			}
 			else
 			{
+				_retryTimes = 0;
+				
 				if ( _onFault != null )
 				{
 					_onFault(this);

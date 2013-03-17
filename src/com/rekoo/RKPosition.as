@@ -1,13 +1,13 @@
 package com.rekoo
 {
 	/**
-	 * 显示对象对齐方式。
+	 * 位置。
 	 * @author Administrator
 	 * 
 	 */	
-	public final class RKDisplayAlign
+	public final class RKPosition
 	{
-		/** 不对齐。默认为容器左上角。 */
+		/** 缺省位置。 */
 		public static const NONE:String = "NONE";
 		
 		/** 绝对居中。 */

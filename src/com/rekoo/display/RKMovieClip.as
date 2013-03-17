@@ -48,8 +48,8 @@ package com.rekoo.display
 			
 			super.skin = value;
 			
-			_curFrame = 0;
-			_totalFrames = 0;
+			_curFrame = 1;
+			_totalFrames = 1;
 			
 			if ( value )
 			{
@@ -222,24 +222,6 @@ package com.rekoo.display
 		{
 			if ( skin )
 			{
-				if ( frameRate > 0 )
-				{
-					_curFrame ++;
-				}
-				else if ( frameRate < 0 )
-				{
-					_curFrame --;
-				}
-				
-				if ( _curFrame > totalFrames )
-				{
-					_curFrame = 1;
-				}
-				else if ( _curFrame < 1 )
-				{
-					_curFrame = frameRate > 0 ? 1 : totalFrames;
-				}
-				
 				render();
 				
 				if ( (frameRate > 0 && _curFrame == totalFrames) || (frameRate < 0 && currentFrame == 1) )
@@ -252,6 +234,27 @@ package com.rekoo.display
 				{
 					stop();
 				}
+				else
+				{
+					if ( frameRate > 0 )
+					{
+						_curFrame ++;
+					}
+					else if ( frameRate < 0 )
+					{
+						_curFrame --;
+					}
+					
+					if ( _curFrame > totalFrames )
+					{
+						_curFrame = 1;
+					}
+					else if ( _curFrame < 1 )
+					{
+						_curFrame = frameRate > 0 ? 1 : totalFrames;
+					}
+				}
+				
 			}
 		}
 		
@@ -269,7 +272,7 @@ package com.rekoo.display
 			
 			if ( skin )
 			{
-				(skin as MovieClip).stop();
+				//(skin as MovieClip).stop();
 				skin = null;
 			}
 			

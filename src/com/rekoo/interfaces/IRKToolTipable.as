@@ -5,49 +5,49 @@ package com.rekoo.interfaces
 	 * @author Administrator
 	 * 
 	 */	
-	public interface IRKToolTipable
+	public interface IRKTooltipable
 	{
 		/**
-		 * toolTip内容。
-		 * @param value Object。
+		 * tooltip内容。
+		 * @param value *。
 		 * 
 		 */		
-		function set toolTip(value:Object):void
+		function set tooltip(value:*):void
 		
 		/**
-		 * toolTip内容。
+		 * tooltip内容。
 		 * @return value Object。
 		 * 
 		 */	
-		function get toolTip():Object;
+		function get tooltip():*;
 		
 		/**
 		 * toolTip皮肤。
 		 * @param value IRKToolTip。
 		 * 
 		 */		
-		function set toolTipSkin(value:IRKToolTipSkin):void;
+		function set tooltipSkin(value:IRKTooltipSkin):void;
 		
 		/**
 		 * toolTip皮肤。
 		 * @return value IRKToolTip。
 		 * 
 		 */	
-		function get toolTipSkin():IRKToolTipSkin;
+		function get tooltipSkin():IRKTooltipSkin;
 		
 		/**
 		 * toolTip对齐方式。
 		 * @return String。
 		 * 
 		 */		
-		function get toolTipAlign():String;
+		function get tooltipAlign():String;
 		
 		/**
 		 * toolTip对齐方式。
 		 * @param value String。
 		 * 
 		 */	
-		function set toolTipAlign(value:String):void
+		function set tooltipAlign(value:String):void
 		
 		/**
 		 * 销毁。 

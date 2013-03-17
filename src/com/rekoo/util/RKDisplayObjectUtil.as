@@ -1,10 +1,10 @@
 package com.rekoo.util
 {
-	import com.rekoo.RKDisplayAlign;
+	import com.rekoo.RKPosition;
 	import com.rekoo.interfaces.IRKMovieClip;
 	import com.rekoo.interfaces.IRKSprite;
-	import com.rekoo.interfaces.IRKToolTipSkin;
-	import com.rekoo.interfaces.IRKToolTipable;
+	import com.rekoo.interfaces.IRKTooltipSkin;
+	import com.rekoo.interfaces.IRKTooltipable;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -12,11 +12,19 @@ package com.rekoo.util
 	import flash.display.MovieClip;
 	import flash.display.Shape;
 	import flash.display.Sprite;
+	import flash.filters.ColorMatrixFilter;
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 
 	public final class RKDisplayObjectUtil
 	{
+		public static const DISABLED_FILTER:ColorMatrixFilter = 
+			new ColorMatrixFilter([0.4086, 0.6094, 0.082, 0, 0,
+				0.4086, 0.6094, 0.082, 0, 0,
+				0.4086, 0.6094, 0.082, 0, 0,
+				0,0,0,1,0]);
+		
 		/**
 		 * 销毁显示对象。
 		 * @param displayObject_ DisplayObject。
@@ -34,13 +42,13 @@ package com.rekoo.util
 				displayObject_.parent.removeChild(displayObject_);
 			}
 			
-			if ( displayObject_ is IRKToolTipSkin )
+			if ( displayObject_ is IRKTooltipSkin )
 			{
-				(displayObject_ as IRKToolTipSkin).dispose();
+				(displayObject_ as IRKTooltipSkin).dispose();
 			}
-			else if ( displayObject_ is IRKToolTipable )
+			else if ( displayObject_ is IRKTooltipable )
 			{
-				(displayObject_ as IRKToolTipable).dispose();
+				(displayObject_ as IRKTooltipable).dispose();
 			}
 			else if ( displayObject_ is IRKSprite )
 			{
@@ -82,56 +90,72 @@ package com.rekoo.util
 		 */		
 		public static function align(target_:DisplayObject, area_:Rectangle, align_:String, offset_:Point = null, simple_:Boolean = false):void
 		{
-			var _rect:Rectangle = simple_ ? new Rectangle() : target_.getBounds(target_);
+			var _rect:Rectangle = null;
+			
+			if ( simple_ )
+			{
+				_rect = new Rectangle();
+			}
+			else
+			{
+				if ( target_.scrollRect != null )
+				{
+					_rect = target_.scrollRect;
+				}
+				else
+				{
+					_rect = target_.getBounds(target_);
+				}
+			}
 			
 			switch ( align_ )
 			{
-				case RKDisplayAlign.LEFT:
+				case RKPosition.LEFT:
 					target_.x = area_.x;
 					target_.y = area_.y + (area_.height - _rect.height) / 2;
 					break;
 				
-				case RKDisplayAlign.LEFT_TOP:
+				case RKPosition.LEFT_TOP:
 					target_.x = area_.x;
 					target_.y = area_.y;
 					break;
 				
-				case RKDisplayAlign.TOP:
+				case RKPosition.TOP:
 					target_.x = area_.x + (area_.width - _rect.width) / 2;
 					target_.y = area_.y;
 					break;
 				
-				case RKDisplayAlign.RIGHT_TOP:
+				case RKPosition.RIGHT_TOP:
 					target_.x = area_.x + area_.width - _rect.width;
 					target_.y = area_.y;
 					break;
 				
-				case RKDisplayAlign.RIGHT:
+				case RKPosition.RIGHT:
 					target_.x = area_.x + area_.width - _rect.width;
 					target_.y = area_.y + (area_.height - _rect.height) / 2;
 					break;
 				
-				case RKDisplayAlign.RIGHT_BOTTOM:
+				case RKPosition.RIGHT_BOTTOM:
 					target_.x = area_.x + area_.width - _rect.width;
 					target_.y = area_.y + area_.height - _rect.height;
 					break;
 				
-				case RKDisplayAlign.BOTTOM:
+				case RKPosition.BOTTOM:
 					target_.x = area_.x + (area_.width - _rect.width) / 2;
 					target_.y = area_.y + area_.height - _rect.height;
 					break;
 				
-				case RKDisplayAlign.LEFT_BOTTOM:
+				case RKPosition.LEFT_BOTTOM:
 					target_.x = area_.x;
 					target_.y = area_.y + area_.height - _rect.height;
 					break;
 				
-				case RKDisplayAlign.CENTER:
+				case RKPosition.CENTER:
 					target_.x = area_.x + (area_.width - _rect.width) / 2;
 					target_.y = area_.y + (area_.height - _rect.height) / 2;
 					break;
 				
-				case RKDisplayAlign.NONE:
+				case RKPosition.NONE:
 					target_.x = area_.x;
 					target_.y = area_.y;
 					break;
@@ -177,6 +201,45 @@ package com.rekoo.util
 			}
 			
 			return _v;
+		}
+		
+		/**
+		 * 获取截图。
+		 * @param displayObject_ 截图对象。
+		 * @param ignoreScale_ 是否忽略缩放。
+		 * @return 截图Bitmap。
+		 * 
+		 */		
+		public static function getCapture(displayObject_:DisplayObject, ignoreScale_:Boolean = false):Bitmap
+		{
+			var _capture:Bitmap = new Bitmap(null, "auto", true);
+			
+			var _sx:Number = displayObject_.scaleX;
+			var _sy:Number = displayObject_.scaleY;
+			
+			if ( ignoreScale_ )
+			{
+				displayObject_.scaleX = displayObject_.scaleY = 1;
+			}
+			
+			var _rect:Rectangle = displayObject_.getBounds(displayObject_);
+			
+			var _bitmapData:BitmapData = new BitmapData(Math.ceil(_rect.width), Math.ceil(_rect.height), true, 0);
+			var _mt:Matrix = displayObject_.transform.matrix.clone();
+			_mt.tx = -_rect.x;
+			_mt.ty = -_rect.y;
+			_bitmapData.lock();
+			_bitmapData.draw(displayObject_, _mt, displayObject_.transform.colorTransform, displayObject_.blendMode, null, true);
+			_bitmapData.unlock();
+			_capture.bitmapData = _bitmapData;
+			
+			if ( ignoreScale_ )
+			{
+				displayObject_.scaleX = _sx;
+				displayObject_.scaleY = _sy;
+			}
+				
+			return _capture;
 		}
 	}
 }

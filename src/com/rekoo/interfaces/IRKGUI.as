@@ -19,13 +19,6 @@ package com.rekoo.interfaces
 		function hide():void;
 		
 		/**
-		 * 返回GUI名称。默认是完整类名。 
-		 * @return String。
-		 * 
-		 */
-		function getName():String;
-		
-		/**
 		 * 返回所在的层。
 		 * @return String。
 		 * 

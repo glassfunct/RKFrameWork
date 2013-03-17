@@ -1,10 +1,11 @@
 package com.rekoo.display
 {
-	import com.rekoo.RKDisplayAlign;
-	import com.rekoo.interfaces.IRKToolTipSkin;
-	import com.rekoo.interfaces.IRKToolTipable;
-	import com.rekoo.manager.RKToopTipManager;
+	import com.rekoo.RKPosition;
+	import com.rekoo.interfaces.IRKTooltipSkin;
+	import com.rekoo.interfaces.IRKTooltipable;
+	import com.rekoo.manager.RKTooptipManager;
 	
+	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
@@ -13,19 +14,19 @@ package com.rekoo.display
 	 * @author Administrator
 	 * 
 	 */	
-	public class RKToolTipableSprite extends RKSprite implements IRKToolTipable
+	public class RKTooltipableSprite extends RKSprite implements IRKTooltipable
 	{
-		private var _toolTip:Object = null;
-		private var _toolTipSkin:IRKToolTipSkin = null;
-		private var _toolTipAlign:String = RKDisplayAlign.NONE;
+		private var _tooltip:* = null;
+		private var _tooltipSkin:IRKTooltipSkin = null;
+		private var _tooltipAlign:String = RKPosition.NONE;
 		
 		/**
 		 * 支持ToolTip的显示基类。
 		 * 
 		 */		
-		public function RKToolTipableSprite()
+		public function RKTooltipableSprite(skin_:DisplayObject = null)
 		{
-			super();
+			super(skin_);
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
@@ -47,24 +48,24 @@ package com.rekoo.display
 		
 		private function onMouseOverHandler(evt_:MouseEvent):void
 		{
-			if ( _toolTipSkin != null )
+			if ( _tooltipSkin != null )
 			{
-				RKToopTipManager.instance.showToolTip(this);
+				RKTooptipManager.instance.showToolTip(this);
 			}
 		}
 		
 		private function onMouseOutHandler(evt_:MouseEvent):void
 		{
-			if ( _toolTipSkin != null )
+			if ( _tooltipSkin != null )
 			{
-				RKToopTipManager.instance.hideToolTip(this);
+				RKTooptipManager.instance.hideToolTip(this);
 			}
 		}
 		
 		override public function dispose():void
 		{
-			_toolTip = null;
-			_toolTipSkin = null;
+			_tooltip = null;
+			_tooltipSkin = null;
 			
 			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			removeEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
@@ -75,34 +76,34 @@ package com.rekoo.display
 			super.dispose();
 		}
 		
-		public function get toolTip():Object
+		public function get tooltip():*
 		{
-			return _toolTip;
+			return _tooltip;
 		}
 
-		public function set toolTip(value:Object):void
+		public function set tooltip(value:*):void
 		{
-			_toolTip = value;
+			_tooltip = value;
 		}
 
-		public function get toolTipSkin():IRKToolTipSkin
+		public function get tooltipSkin():IRKTooltipSkin
 		{
-			return _toolTipSkin;
+			return _tooltipSkin;
 		}
 
-		public function set toolTipSkin(value:IRKToolTipSkin):void
+		public function set tooltipSkin(value:IRKTooltipSkin):void
 		{
-			_toolTipSkin = value;
+			_tooltipSkin = value;
 		}
 
-		public function get toolTipAlign():String
+		public function get tooltipAlign():String
 		{
-			return _toolTipAlign;
+			return _tooltipAlign;
 		}
 
-		public function set toolTipAlign(value:String):void
+		public function set tooltipAlign(value:String):void
 		{
-			_toolTipAlign = value;
+			_tooltipAlign = value;
 		}
 
 	}

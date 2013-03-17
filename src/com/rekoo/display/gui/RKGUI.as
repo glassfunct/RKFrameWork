@@ -1,6 +1,7 @@
 package com.rekoo.display.gui
 {
 	import com.rekoo.display.RKSprite;
+	import com.rekoo.display.RKTooltipableSprite;
 	import com.rekoo.display.layer.RKLayer;
 	import com.rekoo.interfaces.IRKGUI;
 	import com.rekoo.manager.RKLayerManager;
@@ -16,7 +17,7 @@ package com.rekoo.display.gui
 	 * @author Administrator
 	 * 
 	 */	
-	public class RKGUI extends RKSprite implements IRKGUI
+	public class RKGUI extends RKTooltipableSprite implements IRKGUI
 	{
 		/**
 		 * 当添加到舞台上后回调此函数。
@@ -27,7 +28,7 @@ package com.rekoo.display.gui
 		 */		
 		public var onHide:Function = null;
 		
-		private var _className:String = null;
+		
 		
 		/**
 		 * GUI基类。
@@ -47,19 +48,7 @@ package com.rekoo.display.gui
 		 */		
 		protected function parseSkin():void
 		{
-			_className = flash.utils.getQualifiedClassName(this);
-			var _arr:Array = _className.split("::");
-			var _skinDefinitionName:String = null;
-			
-			if ( _arr.length == 1 )
-			{
-				_skinDefinitionName = _arr[0] + "Skin";
-			}
-			else
-			{
-				_skinDefinitionName = _arr[0] + "." + _arr[1] + "Skin";
-			}
-			
+			var _skinDefinitionName:String = getName().replace(/::/g, ".") + "Skin";
 			skin = new (RKResourceManager.instance.getResourceClass(_skinDefinitionName))() as DisplayObject;
 		}
 		
@@ -101,16 +90,6 @@ package com.rekoo.display.gui
 					onHide();
 				}
 			}
-		}
-		
-		/**
-		 * 返回GUI名称。默认是完整类名。 
-		 * @return String。
-		 * 
-		 */		
-		public function getName():String
-		{
-			return _className;
 		}
 		
 		/**

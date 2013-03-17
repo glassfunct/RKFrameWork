@@ -1,11 +1,11 @@
 package com.rekoo.manager
 {
-	import com.rekoo.RKDisplayAlign;
 	import com.rekoo.RKFrameWork;
+	import com.rekoo.RKPosition;
 	import com.rekoo.display.layer.RKLayer;
 	import com.rekoo.interfaces.IRKSprite;
-	import com.rekoo.interfaces.IRKToolTipSkin;
-	import com.rekoo.interfaces.IRKToolTipable;
+	import com.rekoo.interfaces.IRKTooltipSkin;
+	import com.rekoo.interfaces.IRKTooltipable;
 	import com.rekoo.util.RKDisplayObjectUtil;
 	
 	import flash.display.DisplayObject;
@@ -19,13 +19,13 @@ package com.rekoo.manager
 	 * @author Administrator
 	 * 
 	 */	
-	public final class RKToopTipManager
+	public final class RKTooptipManager
 	{
 		private var _container:DisplayObjectContainer = null;
 		
-		private static var _instance:RKToopTipManager = null;
+		private static var _instance:RKTooptipManager = null;
 		
-		public function RKToopTipManager(singletonEnforcer_:SingletonEnforcer)
+		public function RKTooptipManager(singletonEnforcer_:SingletonEnforcer)
 		{
 			_container = RKFrameWork.APP_Stage;
 		}
@@ -35,11 +35,11 @@ package com.rekoo.manager
 		 * @return RKToopTipManager的唯一实例。
 		 * 
 		 */		
-		public static function get instance():RKToopTipManager
+		public static function get instance():RKTooptipManager
 		{
 			if ( _instance == null )
 			{
-				_instance = new RKToopTipManager(new SingletonEnforcer());
+				_instance = new RKTooptipManager(new SingletonEnforcer());
 			}
 			
 			return _instance;
@@ -60,27 +60,27 @@ package com.rekoo.manager
 		 * @param target_ 需要显示tooltip的显示对象。
 		 * 
 		 */		
-		public function showToolTip(target_:IRKToolTipable):void
+		public function showToolTip(target_:IRKTooltipable):void
 		{
-			if ( target_.toolTipSkin == null )
+			if ( target_.tooltipSkin == null || target_.tooltip == null )
 			{
 				return;
 			}
 			
-			target_.toolTipSkin.data = target_.toolTip;
-			_container.addChild(target_.toolTipSkin as DisplayObject);
+			target_.tooltipSkin.tooltip = target_.tooltip;
+			_container.addChild(target_.tooltipSkin as DisplayObject);
 			
-			if ( target_.toolTipAlign == RKDisplayAlign.NONE )
+			if ( target_.tooltipAlign == RKPosition.NONE )
 			{
 				posToolTipSkin(target_);
 				target_.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			}
 			else
 			{
-				var _tipSkin:IRKToolTipSkin = target_.toolTipSkin;
+				var _tipSkin:IRKTooltipSkin = target_.tooltipSkin;
 				var _rect:Rectangle = (target_ as DisplayObject).getBounds(_container);
 				
-				RKDisplayObjectUtil.align(_tipSkin as DisplayObject, _rect, target_.toolTipAlign, null, true);
+				RKDisplayObjectUtil.align(_tipSkin as DisplayObject, _rect, target_.tooltipAlign, null, true);
 			}
 		}
 		
@@ -89,31 +89,46 @@ package com.rekoo.manager
 		 * @param target_ 正在显示tooltip的显示对象。
 		 * 
 		 */		
-		public function hideToolTip(target_:IRKToolTipable):void
+		public function hideToolTip(target_:IRKTooltipable):void
 		{
 			if ( target_.hasEventListener(MouseEvent.MOUSE_MOVE) )
 			{
 				target_.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			}
 			
-			if ( target_.toolTipSkin && _container.contains(target_.toolTipSkin as DisplayObject) )
+			if ( target_.tooltipSkin && _container.contains(target_.tooltipSkin as DisplayObject) )
 			{
-				_container.removeChild(target_.toolTipSkin as DisplayObject);
+				_container.removeChild(target_.tooltipSkin as DisplayObject);
 			}
 		}
 		
 		private function onMouseMove(evt_:MouseEvent):void
 		{
-			var _target:IRKToolTipable = evt_.currentTarget as IRKToolTipable;
+			var _target:IRKTooltipable = evt_.currentTarget as IRKTooltipable;
 			posToolTipSkin(_target);
 		}
 		
-		private function posToolTipSkin(target_:IRKToolTipable):void
+		private function posToolTipSkin(target_:IRKTooltipable):void
 		{
-			if ( target_.toolTipSkin )
+			if ( target_.tooltipSkin )
 			{
-				target_.toolTipSkin.x = _container.mouseX + 10;
-				target_.toolTipSkin.y = _container.mouseY + 15;
+				if ( _container.mouseX + target_.tooltipSkin.width >= RKFrameWork.APP_Width - 15 )
+				{
+					target_.tooltipSkin.x = _container.mouseX - target_.tooltipSkin.width - 3;
+				}
+				else
+				{
+					target_.tooltipSkin.x = _container.mouseX + 10;
+				}
+				
+				if ( _container.mouseY + target_.tooltipSkin.height >= RKFrameWork.APP_Height - 20 )
+				{
+					target_.tooltipSkin.y = _container.mouseY - target_.tooltipSkin.height - 3;
+				}
+				else
+				{
+					target_.tooltipSkin.y = _container.mouseY + 15;
+				}
 			}
 		}
 	}

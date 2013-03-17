@@ -9,14 +9,14 @@ package com.rekoo.interfaces
 		function tick():void;
 		
 		/**
-		 * 心跳步长。
+		 * 心跳步长（秒）。
 		 * @return int。
 		 * 
 		 */		
 		function get interval():int;
 		
 		/**
-		 * 心跳步长。
+		 * 心跳步长（秒）。
 		 * @param value int。
 		 * 
 		 */	

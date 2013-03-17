@@ -8,7 +8,7 @@ package com.rekoo.manager
 	import flash.utils.getTimer;
 	
 	/**
-	 * 心脏中心。心跳间单位：秒。
+	 * 心脏中心。心跳间单位：帧。
 	 * @author Administrator
 	 * 
 	 */	
@@ -54,6 +54,7 @@ package com.rekoo.manager
 				
 				if ( _list.length == 1 )
 				{
+					_lastTime = 0;
 					_stage.addEventListener(Event.ENTER_FRAME, render);
 				}
 			}

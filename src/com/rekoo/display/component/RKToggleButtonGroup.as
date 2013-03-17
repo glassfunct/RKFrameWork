@@ -9,10 +9,10 @@ package com.rekoo.display.component
 	 */	
 	public class RKToggleButtonGroup
 	{
-		private var _btns:Vector.<RKToggleButton> = null;
+		private var _btns:Array = null;
 		private var _onChange:Function = null;
 		
-		private var _selectedIndex:int = 0;
+		private var _selectedIndex:int = -1;
 		private var _selectedBtn:RKToggleButton = null;
 		
 		/**
@@ -20,7 +20,7 @@ package com.rekoo.display.component
 		 * @param buttons_ 所包含的按钮。 
 		 * @param onChange_ 选中项改变后的回调。
 		 */		
-		public function RKToggleButtonGroup(buttons_:Vector.<RKToggleButton>, onChange_:Function = null)
+		public function RKToggleButtonGroup(buttons_:Array, onChange_:Function = null)
 		{
 			_btns = buttons_;
 			_onChange = onChange_;
@@ -30,18 +30,7 @@ package com.rekoo.display.component
 				_btn.selectedCallback = onChange;
 			}
 			
-			selectedIndex = 0;
-		}
-		
-		/**
-		 * 构造单选按钮组。
-		 * @param buttons_ 所包含的按钮。 
-		 * @param onChange_ 选中项改变后的回调。
-		 * @return RKToggleButtonGroup。
-		 */		
-		public static function create(buttons_:Vector.<RKToggleButton>, onChange_:Function = null):RKToggleButtonGroup
-		{
-			return new RKToggleButtonGroup(buttons_);
+			//selectedIndex = 0;
 		}
 		
 		private function onChange(target_:RKToggleButton):void
@@ -56,7 +45,14 @@ package com.rekoo.display.component
 			
 			if ( _onChange != null )
 			{
-				_onChange();
+				if (_onChange.length)
+				{
+					_onChange(this);
+				}
+				else
+				{
+					_onChange();
+				}
 			}
 		}
 		
@@ -77,11 +73,14 @@ package com.rekoo.display.component
 		 */		
 		public function set selectedIndex(value:int):void
 		{
-			if ( value == -1 && _selectedIndex != -1 )
+			if ( value == -1 )
 			{
-				onChange(null);
+				if (  _selectedIndex != -1 )
+				{
+					onChange(null);
+				}
 			}
-			else
+			else/* if ( _selectedIndex != value )*/
 			{
 				_btns[value].selected = true;
 			}

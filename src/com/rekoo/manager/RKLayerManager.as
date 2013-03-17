@@ -35,27 +35,27 @@ package com.rekoo.manager
 		 */		
 		public function registerLayer(layer_:RKLayer):Boolean
 		{
-			if ( hasLayerRegisted(layer_.getName()) )
+			if ( hasLayerRegisted(layer_.getType()) )
 			{
 				return false;
 			}
 			
-			_layerDic[layer_.getName()] = layer_;
+			_layerDic[layer_.getType()] = layer_;
 			
 			return true;
 		}
 		
 		/**
 		 * 注销层。注销了就不能用了。
-		 * @param name_ 层名称。
+		 * @param type_ 层类型。
 		 * @return 是否注销成功。
 		 * 
 		 */		
-		public function unregisterLayer(name_:String):Boolean
+		public function unregisterLayer(type_:String):Boolean
 		{
-			if ( hasLayerRegisted(name_) )
+			if ( hasLayerRegisted(type_) )
 			{
-				delete _layerDic[name_];
+				delete _layerDic[type_];
 				return true;
 			}
 			
@@ -64,22 +64,22 @@ package com.rekoo.manager
 		
 		/**
 		 * 是否已注册过某层。
-		 * @param name_ 层名称。
+		 * @param type_ 层类型。
 		 * @return Boolean。
 		 * 
 		 */		
-		public function hasLayerRegisted(name_:String):Boolean
+		public function hasLayerRegisted(type_:String):Boolean
 		{
-			return _layerDic.hasOwnProperty(name_);
+			return _layerDic.hasOwnProperty(type_);
 		}
 		
 		/**
 		 * 获取一个RKLayer。
-		 * @param name_ RKLayer的注册名称。
+		 * @param type_ RKLayer的类型。
 		 */
-		public function getLayer(name_:String):RKLayer
+		public function getLayer(type_:String):RKLayer
 		{
-			return _layerDic[name_];
+			return _layerDic[type_];
 		}
 	}
 }

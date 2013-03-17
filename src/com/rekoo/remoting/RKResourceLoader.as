@@ -103,6 +103,8 @@ package com.rekoo.remoting
 			{
 				super.load(new URLRequest(_hashedURL), context_);
 			}
+			
+			_retryTimes ++;
 		}
 		
 		/**
@@ -161,6 +163,8 @@ package com.rekoo.remoting
 		
 		private function onResult(evt_:Event):void
 		{
+			_retryTimes = 0;
+			
 			clearEvent();
 			
 			if ( _onResult != null )
@@ -176,10 +180,11 @@ package com.rekoo.remoting
 			if ( _curRetryTimes < _retryTimes )
 			{
 				execute(_onResult, _onFault, _bytes, _context);
-				_curRetryTimes ++;
 			}
 			else
 			{
+				_retryTimes = 0;
+				
 				if ( _onFault != null )
 				{
 					_onFault(this);

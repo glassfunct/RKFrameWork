@@ -9,6 +9,7 @@ package com.rekoo.manager
 	import com.rekoo.remoting.RKResourceURLLoader;
 	
 	import flash.display.BitmapData;
+	import flash.display.Shape;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLLoaderDataFormat;
@@ -97,6 +98,44 @@ package com.rekoo.manager
 			return false;
 		}
 		
+		private function isToLoad(url_:String):int
+		{
+			var _len:int = _resToLoadURL.length;
+			
+			for ( var _i:int = 0; _i < _len; _i ++ )
+			{
+				if ( _resToLoadURL[_i]["url"] == url_ )
+				{
+					return _i;
+				}
+			}
+			
+			return -1;
+		}
+		
+		private function getLoadingObj(url_:String):Object
+		{
+			var _urlObj:Object = null;
+			
+			for each ( _urlObj in _resLoadingURL )
+			{
+				if ( _urlObj["url"] == url_ )
+				{
+					return _urlObj;
+				}
+			}
+			
+			for each ( _urlObj in _resToLoadURL )
+			{
+				if ( _urlObj["url"] == url_ )
+				{
+					return _urlObj;
+				}
+			}
+			
+			return null;
+		}
+		
 		/**
 		 * 是否加载完成。
 		 * @param url_ 素材URL。
@@ -121,15 +160,41 @@ package com.rekoo.manager
 		{
 			if ( isLoading(url_) )
 			{
-				throw new Error("资源已在加载中！");
+				var _urlObj:Object = getLoadingObj(url_);
+				
+				if ( onComplete_ != null )
+				{
+					_urlObj["complete"].push(onComplete_);
+				}
+				
+				if ( onFault_ != null )
+				{
+					_urlObj["fault"].push(onFault_);
+				}
+				
+				var _index:int = isToLoad(url_);
+				
+				if ( _index > -1 )
+				{
+					var _obj:Object = _resToLoadURL.splice(_index, 1);
+					startLoad(url_, binaryMode_, _obj["complete"], _obj["fault"], effectLoadingPer_, showLoading_);
+				}
 			}
 			else if ( isLoaded(url_) )
 			{
-				throw new Error("资源已存在！");
+				//throw new Error("资源已存在！");
+				if ( onComplete_.length )
+				{
+					onComplete_(url_);
+				}
+				else
+				{
+					onComplete_();
+				}
 			}
 			else
 			{
-				startLoad(url_, binaryMode_, onComplete_, onFault_, showLoading_);
+				startLoad(url_, binaryMode_, [onComplete_], [onFault_], showLoading_);
 			}
 		}
 		
@@ -146,38 +211,46 @@ package com.rekoo.manager
 		{
 			if ( isLoading(url_) )
 			{
-				throw new Error("资源已在加载中！");
+				var _urlObj:Object = getLoadingObj(url_);
+				
+				if ( onComplete_ != null )
+				{
+					_urlObj["complete"].push(onComplete_);
+				}
+				
+				if ( onFault_ != null )
+				{
+					_urlObj["fault"].push(onFault_);
+				}
 			}
 			else if ( isLoaded(url_) )
 			{
-				throw new Error("资源已存在！");
+				//throw new Error("资源已存在！");
+				if ( onComplete_.length )
+				{
+					onComplete_(url_);
+				}
+				else
+				{
+					onComplete_();
+				}
+				
 			}
 			else
 			{
 				if ( _resLoadingURL.length < RKFrameWork.resLoadMaxConnections )
 				{
-					startLoad(url_, binaryMode_, onComplete_, onFault_, effectLoadingPer_, showLoading_);
+					startLoad(url_, binaryMode_, [onComplete_], [onFault_], effectLoadingPer_, showLoading_);
 				}
 				else
 				{
-					delayLoad(url_, binaryMode_, onComplete_, onFault_, effectLoadingPer_, showLoading_);
+					delayLoad(url_, binaryMode_, [onComplete_], [onFault_], effectLoadingPer_, showLoading_);
 				}
 			}
 		}
 		
-		private function startLoad(url_:String, binaryMode_:Boolean = false, onComplete_:Function = null, onFault_:Function = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
+		private function startLoad(url_:String, binaryMode_:Boolean = false, onComplete_:Array = null, onFault_:Array = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
 		{
-			if ( _resDic.hasOwnProperty(url_) )
-			{
-				if ( onComplete_ != null )
-				{
-					onComplete_();
-				}
-				
-				this.loadSingleCompleteHandler(url_);
-				return;
-			}
-			
 			if ( effectLoadingPer_ )
 			{
 				_totalFilesInProgress ++;
@@ -226,7 +299,7 @@ package com.rekoo.manager
 			}
 		}
 		
-		private function delayLoad(url_:String, binaryMode_:Boolean = false,  onComplete_:Function = null, onFault_:Function = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
+		private function delayLoad(url_:String, binaryMode_:Boolean = false,  onComplete_:Array = null, onFault_:Array = null, effectLoadingPer_:Boolean = true, showLoading_:Boolean = true):void
 		{
 			if ( effectLoadingPer_ )
 			{
@@ -276,9 +349,19 @@ package com.rekoo.manager
 				{
 					if ( _urlObj == _resLoadingURL[_i]["url"] )
 					{
-						if ( _resLoadingURL[_i]["complete"] != null )
+						for each ( var _compelteFunc:Function in _resLoadingURL[_i]["complete"] )
 						{
-							_resLoadingURL[_i]["complete"]();
+							if ( _compelteFunc != null )
+							{
+								if ( _compelteFunc.length )
+								{
+									_compelteFunc(String(_urlObj));
+								}
+								else
+								{
+									_compelteFunc();
+								}
+							}
 						}
 						
 						if ( _resLoadingURL[_i]["effectLoadingPer"] )
@@ -310,7 +393,7 @@ package com.rekoo.manager
 				_urlObj = target_;
 			}
 			
-			dispatchEvent(new RKResourceEvent(RKResourceEvent.EVENT_COMPLETE_SINGLE_FILE, String(_urlObj)));
+			dispatchEvent(new RKResourceEvent(RKResourceEvent.EVENT_COMPLETE_SINGLE_FILE + String(_urlObj), String(_urlObj)));
 			
 			if ( _resLoadingURL.length < RKFrameWork.resLoadMaxConnections && _resToLoadURL.length > 0 )
 			{
@@ -342,8 +425,8 @@ package com.rekoo.manager
 		 */
 		public function getResourceClass(definitionName_:String):Class
 		{
-			trace("-------------------------------------------------------------------------");
-			trace("get resource class:", definitionName_);
+			//trace("-------------------------------------------------------------------------");
+			//trace("get resource class:", definitionName_);
 			
 			var CLS:Class = null;
 			
@@ -351,7 +434,7 @@ package com.rekoo.manager
 			{
 				if ( _domain.hasDefinition(definitionName_) )
 				{
-					trace("success");
+					//trace("success");
 					CLS = _domain.getDefinition(definitionName_) as Class;
 					break;
 				}
@@ -359,7 +442,7 @@ package com.rekoo.manager
 			
 			if ( CLS == null )
 			{
-				trace("fail");
+				CLS = Shape;
 			}
 			
 			return CLS;
@@ -505,7 +588,10 @@ package com.rekoo.manager
 						RKFrameWork.loadingDisContainer.removeChild(RKFrameWork.resLoadingDis);
 					}
 					
-					RKFrameWork.loadingDisContainer.graphics.clear();
+					if ( RKFrameWork.loadingDisContainer.numChildren == 0 )
+					{
+						RKFrameWork.loadingDisContainer.graphics.clear();
+					}
 				}
 				
 				return;

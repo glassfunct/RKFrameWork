@@ -18,7 +18,7 @@ package com.rekoo.display
 	{
 		private var _mc:MovieClip = null;
 		private var _bitmap:Bitmap = null;
-		private var _bitmapDataArr:Vector.<BitmapData> = new Vector.<BitmapData>();
+		private var _bitmapDataArr:Vector.<Object> = new Vector.<Object>();
 		
 		/**
 		 * 使用位图缓存的影片剪辑。
@@ -26,10 +26,18 @@ package com.rekoo.display
 		 * @param autoPlay_ 是否自动播放。
 		 * @param loop_ 循环次数。0为无限循环。
 		 * @param frameRate_ 自定义帧频。初始化时若为0则按应用的帧频。
+		 * @param totalFrames_ 总帧数。若为0则使用skin_的最外层影片剪辑总帧数。
 		 */
-		public function RKBitmapMovieClip(skin_:MovieClip=null, autoPlay_:Boolean=true, loop_:uint=0, frameRate_:int=0)
+		public function RKBitmapMovieClip(skin_:MovieClip=null, autoPlay_:Boolean=true, loop_:uint=0, frameRate_:int=0, totalFrames_:int = 0)
 		{
+			_bitmap = new Bitmap(null, "auto", true);
+			addChild(_bitmap);
 			super(skin_, autoPlay_, loop_, frameRate_);
+			
+			if ( totalFrames_ > 0 )
+			{
+				_totalFrames = totalFrames_;
+			}
 		}
 		
 		/**
@@ -40,13 +48,15 @@ package com.rekoo.display
 		public function createFromBitmapDatas(bitmapDatas_:Vector.<BitmapData>):RKBitmapMovieClip
 		{
 			skin = null;
-			_bitmapDataArr = bitmapDatas_;
+			
+			for each ( var _bd:BitmapData in bitmapDatas_ )
+			{
+				_bitmapDataArr.push({"bitmapData":_bd, "matrix":new Matrix()});
+			}
+			
 			
 			_curFrame = 0;
 			_totalFrames = _bitmapDataArr.length;
-			
-			_bitmap = new Bitmap(null, "auto", true);
-			addChild(_bitmap);
 			
 			if ( autoPlay )
 			{
@@ -70,11 +80,6 @@ package com.rekoo.display
 			
 			if ( _mc )
 			{
-				_bitmap = new Bitmap(null, "auto", true);
-				_bitmap.x = _mc.x;
-				_bitmap.y = _mc.y;
-				_mc.parent.addChild(_bitmap);
-				
 				removeChild(_mc);
 				
 				if ( autoPlay )
@@ -101,11 +106,11 @@ package com.rekoo.display
 				var rect:Rectangle = _mc.getBounds(_mc);
 				var bitmapData:BitmapData = new BitmapData(Math.ceil(rect.width),Math.ceil(rect.height),true,0);
 				var _mt:Matrix = _mc.transform.matrix.clone();
-				_mt.tx = 0;
-				_mt.ty = 0;
+				_mt.tx = -rect.x;
+				_mt.ty = -rect.y;
 				bitmapData.draw(_mc, _mt, _mc.transform.colorTransform, _mc.blendMode, null, true);
 				
-				_bitmapDataArr[currentFrame - 1] = bitmapData;
+				_bitmapDataArr[currentFrame - 1] = {"bitmapData":bitmapData, "matrix":new Matrix(1, 0, 0, 1, rect.x, rect.y)};
 				
 				if ( _bitmapDataArr.length == totalFrames )
 				{
@@ -125,7 +130,9 @@ package com.rekoo.display
 				}
 			}
 			
-			_bitmap.bitmapData = _bitmapDataArr[currentFrame - 1];
+			_bitmap.bitmapData = _bitmapDataArr[currentFrame - 1]["bitmapData"];
+			_bitmap.x = _bitmapDataArr[currentFrame - 1]["matrix"].tx;
+			_bitmap.y = _bitmapDataArr[currentFrame - 1]["matrix"].ty;
 		}
 		
 		override public function dispose():void
@@ -137,9 +144,9 @@ package com.rekoo.display
 		
 		private function disposeBitmap():void
 		{
-			for each ( var _bd:BitmapData in _bitmapDataArr )
+			for each ( var _obj:Object in _bitmapDataArr )
 			{
-				_bd.dispose();
+				_obj["bitmapData"].dispose();
 			}
 			
 			_bitmapDataArr.length = 0;
@@ -156,12 +163,12 @@ package com.rekoo.display
 					_bitmap.bitmapData.dispose();
 				}
 				
-				if ( contains(_bitmap) )
-				{
-					removeChild(_bitmap);
-				}
+				//if ( contains(_bitmap) )
+				//{
+				//	removeChild(_bitmap);
+				//}
 				
-				_bitmap = null;
+				//_bitmap = null;
 			}
 		}
 	}

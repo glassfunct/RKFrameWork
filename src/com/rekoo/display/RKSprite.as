@@ -9,6 +9,7 @@ package com.rekoo.display
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
+	import flash.filters.BitmapFilter;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
@@ -20,16 +21,21 @@ package com.rekoo.display
 	 */	
 	public class RKSprite extends Sprite implements IRKSprite
 	{
+		public var onNumchildrenChange:Function = null;
+		
 		private var _skin:DisplayObject = null;
-		private var _capture:Bitmap = new Bitmap(null, "auto", true);
 		private var _enabled:Boolean = false;
 		private var _selected:Boolean = false;
+		private var _selectable:Boolean = false;
+		private var _onSelected:Function = null;
 		
 		private var _evtDic:Dictionary = new Dictionary();
 		private var _dragable:Boolean = false;
 		private var _dragArea:Rectangle = null;
 		private var _drag:Function = null;
 		private var _drop:Function = null;
+		
+		private var _active:Boolean = false;
 		
 		/**
 		 * <b>基本显示对象。</b>
@@ -39,13 +45,13 @@ package com.rekoo.display
 		public function RKSprite(skin_:DisplayObject = null)
 		{
 			super();
+			enabled = true;
+			selectable = false;
 			
-			_enabled = true;
-			
-			if ( skin_ )
-			{
+//			if ( skin_ )
+//			{
 				skin = skin_;
-			}
+//			}
 			
 			_dragArea = getBounds(this);
 		}
@@ -80,7 +86,7 @@ package com.rekoo.display
 				{
 					x = _skin.x;
 					y = _skin.y;
-					_skin.parent.addChild(this);
+					_skin.parent.addChildAt(this, _skin.parent.getChildIndex(_skin));
 				}
 				
 				_skin.x = 0;
@@ -144,6 +150,13 @@ package com.rekoo.display
 			graphics.clear();
 			
 			clearEvents();
+			
+			if ( parent )
+			{
+				parent.removeChild(this);
+			}
+			
+			_onSelected = null;
 		}
 		
 		/**
@@ -166,6 +179,7 @@ package com.rekoo.display
 		public function set enabled(value:Boolean):void
 		{
 			_enabled = value;
+			buttonMode = (enabled && selectable);
 		}
 		
 		public function get selected():Boolean
@@ -175,7 +189,33 @@ package com.rekoo.display
 		
 		public function set selected(value:Boolean):void
 		{
-			_selected = value;
+			if ( _selectable && _selected != value )
+			{
+				_selected = value;
+				
+				if ( selected && _onSelected != null )
+				{
+					if ( _onSelected.length )
+					{
+						_onSelected(this);
+					}
+					else
+					{
+						_onSelected();
+					}
+				}
+			}
+			
+		}
+		
+		public function get onSelected():Function
+		{
+			return _onSelected;
+		}
+		
+		public function set onSelected(value:Function):void
+		{
+			_onSelected = value;
 		}
 		
 		override public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
@@ -363,27 +403,152 @@ package com.rekoo.display
 			_drop = value;
 		}
 		
-		public function getCapture(refresh_:Boolean = true):Bitmap
+		/**
+		 * 添加滤镜。
+		 * @param args BitmapFilter。
+		 * 
+		 */		
+		public function applyFilters(...args):void
 		{
-			if ( refresh_ && _capture.bitmapData )
+			var _fs:Array = [];
+			
+			if ( filters != null && filters.length > 0 )
 			{
-				_capture.bitmapData.dispose();
+				for each ( var _f:BitmapFilter in filters  )
+				{
+					_fs.push(_f);
+				}
 			}
 			
-			if ( !_capture.bitmapData )
+			if ( args.length > 0 )
 			{
-				var _rect:Rectangle = getBounds(this);
-				var _bitmapData:BitmapData = new BitmapData(Math.ceil(_rect.width), Math.ceil(_rect.height), true, 0);
-				var _mt:Matrix = transform.matrix.clone();
-				_mt.tx = 0;
-				_mt.ty = 0;
-				_bitmapData.lock();
-				_bitmapData.draw(this, _mt, transform.colorTransform, blendMode, null, true);
-				_bitmapData.unlock();
-				_capture.bitmapData = _bitmapData;
+				for each ( var _nf:BitmapFilter in args )
+				{
+					_fs.push(_nf);
+				}
+				
+				filters = _fs;
 			}
-			
-			return _capture;
 		}
+		
+		/**
+		 * 移除滤镜。
+		 * @param args BitmapFilter。
+		 * 
+		 */		
+		public function removeFilters(...args):void
+		{
+			if ( filters != null && filters.length > 0 && args.length > 0 )
+			{
+				var _fs:Array = filters;
+				
+				var _len:int = args.length;
+				
+				for ( var _i:int = 0; _i < _len; _i ++ )
+				{
+					if ( _fs.indexOf(args[_i] != -1) )
+					{
+						_fs.splice(_i, 1);
+					}
+				}
+				
+				filters = _fs;
+			}
+		}
+
+		public function get selectable():Boolean
+		{
+			return _selectable;
+		}
+
+		public function set selectable(value:Boolean):void
+		{
+			_selectable = value;
+			buttonMode = (enabled && selectable);
+		}
+		
+		/**
+		 * 返回名称。默认是完整类名。 
+		 * @return String。
+		 */		
+		public function getName():String
+		{
+			return flash.utils.getQualifiedClassName(this);
+		}
+
+		/**
+		 * 是否相应鼠标。一般不需要手动设置。
+		 */
+		public function get active():Boolean
+		{
+			return _active;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set active(value:Boolean):void
+		{
+			_active = value;
+		}
+		
+		override public function addChild(child:DisplayObject):DisplayObject
+		{
+			super.addChild(child);
+			
+			if ( onNumchildrenChange != null )
+			{
+				onNumchildrenChange();
+			}
+			
+			return child;
+		}
+		
+		override public function addChildAt(child:DisplayObject, index:int):DisplayObject
+		{
+			super.addChildAt(child, index);
+			
+			if ( onNumchildrenChange != null )
+			{
+				onNumchildrenChange();
+			}
+			
+			return child;
+		}
+		
+		override public function removeChild(child:DisplayObject):DisplayObject
+		{
+			var _c:DisplayObject = super.removeChild(child);
+			
+			if ( onNumchildrenChange != null )
+			{
+				onNumchildrenChange();
+			}
+			
+			return _c;
+		}
+		
+		override public function removeChildAt(index:int):DisplayObject
+		{
+			var _c:DisplayObject = super.removeChildAt(index);
+			
+			if ( onNumchildrenChange != null )
+			{
+				onNumchildrenChange();
+			}
+			
+			return _c;
+		}
+		
+		override public function removeChildren(beginIndex:int=0, endIndex:int=int.MAX_VALUE):void
+		{
+			super.removeChildren(beginIndex, endIndex);
+			
+			if ( onNumchildrenChange != null )
+			{
+				onNumchildrenChange();
+			}
+		}
+
 	}
 }
