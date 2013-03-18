@@ -9,6 +9,7 @@ package com.rekoo.util
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.MovieClip;
 	import flash.display.Shape;
 	import flash.display.Sprite;
@@ -240,6 +241,14 @@ package com.rekoo.util
 			}
 				
 			return _capture;
+		}
+		
+		public static function removeAllChildren(disp_:DisplayObjectContainer):void
+		{
+			while ( disp_.numChildren )
+			{
+				disp_.removeChildAt(0);
+			}
 		}
 	}
 }

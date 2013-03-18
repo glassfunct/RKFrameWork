@@ -36,6 +36,9 @@ package com.rekoo.display.component
 		protected var _mask:DisplayObject = null;
 		protected var _target:DisplayObject = null;
 		
+		private var _tarOrgX:Number = 0.0;
+		private var _tarOrgY:Number = 0.0;
+		
 		private var _refValue:Number = 0.0;
 		private var _totalValue:Number = 0.0;
 		
@@ -182,7 +185,7 @@ package com.rekoo.display.component
 							_num1 = 0;
 						}
 						
-						_target.x = _mask.x + _num1;
+						_target.x = _tarOrgX + _num1;
 					}
 					
 					if ( _oldThumbTargetPos.x != _thumbTargetPos.x && _changeFunc != null )
@@ -203,7 +206,7 @@ package com.rekoo.display.component
 							_num2 = 0;
 						}
 						
-						_target.y = _mask.y + _num2;
+						_target.y = _tarOrgY + _num2;
 					}
 					
 					if ( _oldThumbTargetPos.y != _thumbTargetPos.y && _changeFunc != null )
@@ -249,8 +252,10 @@ package com.rekoo.display.component
 			}
 			
 			target_.mask = mask_;
-			target_.x = mask_.x;
-			target_.y = mask_.y;
+			_tarOrgX = target_.x;
+			_tarOrgY = target_.y;
+			//target_.x = mask_.x;
+			//target_.y = mask_.y;
 			
 			_target = target_;
 			_mask = mask_;

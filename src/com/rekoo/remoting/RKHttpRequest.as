@@ -84,7 +84,7 @@ package com.rekoo.remoting
 			_retryTimes = RKFrameWork.httpRequestMaxRetryTimes;
 			
 			_onResult = onResult_;
-			_onFault = _onFault;
+			_onFault = onFault_;
 			
 			_urlLoader.addEventListener(Event.COMPLETE, onResultHandler);
 			_urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onFaultHandler);
