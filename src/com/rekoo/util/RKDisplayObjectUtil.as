@@ -101,7 +101,7 @@ package com.rekoo.util
 			{
 				if ( target_.scrollRect != null )
 				{
-					_rect = target_.scrollRect;
+					_rect = target_.scrollRect.clone();
 				}
 				else
 				{
@@ -223,7 +223,8 @@ package com.rekoo.util
 				displayObject_.scaleX = displayObject_.scaleY = 1;
 			}
 			
-			var _rect:Rectangle = displayObject_.getBounds(displayObject_);
+			var _rect:Rectangle = displayObject_.scrollRect ? 
+				displayObject_.scrollRect.clone() : displayObject_.getBounds(displayObject_);
 			
 			var _bitmapData:BitmapData = new BitmapData(Math.ceil(_rect.width), Math.ceil(_rect.height), true, 0);
 			var _mt:Matrix = displayObject_.transform.matrix.clone();

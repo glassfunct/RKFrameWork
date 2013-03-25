@@ -71,5 +71,17 @@ package com.rekoo.util
 				}
 			}
 		}
+		
+		public static function getKeys(obj_:Object):Array
+		{
+			var _arr:Array = [];
+			
+			for ( var _key:String in obj_ )
+			{
+				_arr.push(_key);
+			}
+			
+			return _arr;
+		}
 	}
 }

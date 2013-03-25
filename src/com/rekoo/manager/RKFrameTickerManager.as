@@ -73,6 +73,7 @@ package com.rekoo.manager
 			{
 				if ( _list[_i]["ticker"] == ticker_ )
 				{
+					_list[_i]["ticker"] = null;
 					_list.splice(_i ,1);
 					break;
 				}
@@ -104,6 +105,11 @@ package com.rekoo.manager
 			
 			for each ( var _tickerObj:Object in _list )
 			{
+				if ( _tickerObj["ticker"] == null )
+				{
+					continue;
+				}
+				
 				_tFrameRate = _tickerObj["ticker"].hasOwnProperty("frameRate") ? _tickerObj["ticker"].frameRate : RKFrameWork.APP_Stage.frameRate;
 				
 				if ( _tFrameRate != 0 )
@@ -112,7 +118,11 @@ package com.rekoo.manager
 					
 					while ( _tickerObj["frameTimer"] < 0 )
 					{
-						_tickerObj["ticker"].tick();
+						if ( _tickerObj["ticker"] != null )
+						{
+							_tickerObj["ticker"].tick();
+						}
+						
 						_tickerObj["frameTimer"] += 1000 / Math.abs(_tFrameRate);
 					}
 				}

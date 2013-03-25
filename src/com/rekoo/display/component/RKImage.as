@@ -110,7 +110,7 @@ package com.rekoo.display.component
 		
 		private function showLoadingMC():void
 		{
-			_loadingC = new RKLoadingCircle(Math.max(5, Math.min(Math.min(_w, _h) / 3, 15)));
+			_loadingC = new RKLoadingCircle(Math.min(20, Math.max(Math.min(_w, _h) / 5, 5)));
 			_loadingC.x = _w / 2;
 			_loadingC.y = _h / 2;
 			addChild(_loadingC);

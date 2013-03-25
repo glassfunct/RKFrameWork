@@ -35,6 +35,7 @@
     <classEntry path="com.rekoo.display.component.RKPageStepper"/>
     <classEntry path="com.rekoo.display.component.RKPageTileList"/>
     <classEntry path="com.rekoo.util.RKObjectUtil"/>
+    <classEntry path="com.rekoo.util.RKDateUtil"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

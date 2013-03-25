@@ -93,12 +93,12 @@ package com.rekoo.display.component
 		
 		private function onaAddedToStage(evt_:Event):void
 		{
-			RKFrameWork.APP_Stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+			RKFrameWork.APP_Stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel, true);
 		}
 		
 		private function onRemovedFromStage(evt_:Event):void
 		{
-			RKFrameWork.APP_Stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+			RKFrameWork.APP_Stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel, true);
 		}
 		
 		private function onMouseWheel(evt_:MouseEvent):void
@@ -122,6 +122,7 @@ package com.rekoo.display.component
 			{
 				_thumbTargetPos.y -= evt_.delta * _step / _stepScale;
 				updatePos();
+				evt_.stopPropagation();
 			}
 		}
 		

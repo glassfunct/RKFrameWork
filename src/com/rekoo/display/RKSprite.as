@@ -189,7 +189,7 @@ package com.rekoo.display
 		
 		public function set selected(value:Boolean):void
 		{
-			if ( _selectable && _selected != value )
+			if ( selectable && enabled && selected != value )
 			{
 				_selected = value;
 				

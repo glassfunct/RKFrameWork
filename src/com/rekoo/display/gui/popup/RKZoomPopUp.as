@@ -1,11 +1,15 @@
 package com.rekoo.display.gui.popup
 {
 	import com.greensock.TweenLite;
+	import com.greensock.easing.Back;
+	import com.greensock.easing.Bounce;
 	import com.greensock.plugins.TransformAroundCenterPlugin;
 	import com.rekoo.RKFrameWork;
 	import com.rekoo.interfaces.IRKFrameTicker;
 	import com.rekoo.manager.RKFrameTickerManager;
+	import com.rekoo.util.RKDisplayObjectUtil;
 	
+	import flash.display.Bitmap;
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
@@ -33,49 +37,73 @@ package com.rekoo.display.gui.popup
 		{
 			if ( scrollRect != null )
 			{
-				_rect = scrollRect;
+				_rect = scrollRect.clone();
 			}
 			else
 			{
 				_rect = getBounds(this);
 			}
 			
-			scaleX = 0.0;
-			scaleY = 0.0;
-			
-			x += _rect.width / 2;
-			y += _rect.height / 2;
+			visible = false;
 			
 			super.show();
 			
-			//TweenLite.to(this, 0.2, {transformAroundCenter:{scale:1.0}});
+			_bm = RKDisplayObjectUtil.getCapture(this);
 			
-			RKFrameTickerManager.instance.register(this);
+			_bm.scaleX = 0.0;
+			_bm.scaleY = 0.0;
+			
+			_bm.x = x + _rect.x + _rect.width / 2;
+			_bm.y = y + _rect.y + _rect.height / 2;
+			
+			parent.addChild(_bm);
+			
+			TweenLite.to(_bm, 0.35, {transformAroundCenter:{scale:1.0}, ease:Back.easeOut, onComplete:onTweenComplete});
+			
+			//RKFrameTickerManager.instance.register(this);
 		}
+		
+		private function onTweenComplete():void
+		{
+			visible = true;
+			
+			parent.removeChild(_bm);
+			_bm.bitmapData.dispose();
+			_bm = null;
+		}
+		
+		private var _bm:Bitmap = null;
 		
 		public function tick():void
 		{
-			if ( scaleX < 1  )
+			if ( _bm.scaleX < 1 )
 			{
-				scaleX += 0.3;
-				x -= _rect.width / 2 * 0.3;
+				_bm.scaleX += 0.3;
+				_bm.x -= _rect.width / 2 * 0.3;
 			}
 			
-			if ( scaleY < 1 )
+			if ( _bm.scaleY < 1 )
 			{
-				scaleY += 0.3;
-				y -= _rect.height / 2 * 0.3;
+				_bm.scaleY += 0.3;
+				_bm.y -= _rect.height / 2 * 0.3;
 			}
 			
-			if ( scaleX >= 1 && scaleY >= 1 )
+			if ( _bm.scaleX >= 1 && _bm.scaleY >= 1 )
 			{
-				scaleX = 1;
-				scaleY = 1;
+				/*
+				_bm.scaleX = 1;
+				_bm.scaleY = 1;
 				
-				x = (RKFrameWork.APP_Width - _rect.width) / 2;
-				y = (RKFrameWork.APP_Height - _rect.height) / 2;
-				
+				_bm.x = (RKFrameWork.APP_Width - _rect.width) / 2;
+				_bm.y = (RKFrameWork.APP_Height - _rect.height) / 2;
+				*/
 				RKFrameTickerManager.instance.unregister(this);
+				
+				visible = true;
+				
+				parent.removeChild(_bm);
+				_bm.bitmapData.dispose();
+				_bm = null;
 			}
 		}
 	}

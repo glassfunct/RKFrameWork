@@ -55,7 +55,7 @@ package com.rekoo.display
 			}
 			
 			
-			_curFrame = 0;
+			_curFrame = 1;
 			_totalFrames = _bitmapDataArr.length;
 			
 			if ( autoPlay )
