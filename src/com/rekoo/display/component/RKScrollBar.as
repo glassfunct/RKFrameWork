@@ -1,5 +1,6 @@
 package com.rekoo.display.component
 {
+	import com.greensock.TweenLite;
 	import com.rekoo.RKDirection;
 	import com.rekoo.RKFrameWork;
 	import com.rekoo.RKPosition;
@@ -11,6 +12,8 @@ package com.rekoo.display.component
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
+	
+	import mx.effects.Tween;
 	
 	/**
 	 * 滚动条。
@@ -186,7 +189,10 @@ package com.rekoo.display.component
 							_num1 = 0;
 						}
 						
-						_target.x = _tarOrgX + _num1;
+						TweenLite.killTweensOf(_target);
+						TweenLite.to(_target, 0.2, {x:_tarOrgX + _num1});
+						
+						//_target.x = _tarOrgX + _num1;
 					}
 					
 					if ( _oldThumbTargetPos.x != _thumbTargetPos.x && _changeFunc != null )
@@ -207,7 +213,9 @@ package com.rekoo.display.component
 							_num2 = 0;
 						}
 						
-						_target.y = _tarOrgY + _num2;
+						TweenLite.killTweensOf(_target);
+						TweenLite.to(_target, 0.2, {y:_tarOrgY + _num2});
+						//_target.y = _tarOrgY + _num2;
 					}
 					
 					if ( _oldThumbTargetPos.y != _thumbTargetPos.y && _changeFunc != null )
